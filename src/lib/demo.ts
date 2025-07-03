@@ -140,7 +140,7 @@ export const DEMO_TASKS = [
 
 // Demo configuration
 export const DEMO_CONFIG = {
-  autoLogin: true,
+  autoLogin: false,
   showDemoBanner: true,
   allowCreateProjects: true,
   allowCreateTasks: true

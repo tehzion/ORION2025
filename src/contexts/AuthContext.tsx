@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase, Profile } from '../lib/supabase'
-import { DEMO_MODE, DEMO_USER, DEMO_PROFILE } from '../lib/demo'
+import { DEMO_MODE, DEMO_USER, DEMO_PROFILE, DEMO_CONFIG } from '../lib/demo'
 
 interface AuthContextType {
   user: User | null
@@ -96,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    if (DEMO_MODE) {
+    if (DEMO_MODE && DEMO_CONFIG.autoLogin) {
       // Demo mode - auto login with mock user
       setUser({
         ...DEMO_USER,

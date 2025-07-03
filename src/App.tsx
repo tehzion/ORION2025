@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
-import { AuthForm } from './components/auth/AuthForm'
+import { LoginPage } from './components/auth/LoginPage'
 import { MainLayout } from './components/layout/MainLayout'
 
 // Error Boundary Component
@@ -47,7 +47,6 @@ class ErrorBoundary extends React.Component<
 
 function AppContent() {
   const { user, loading } = useAuth()
-  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
 
   // Debug logging
   useEffect(() => {
@@ -64,13 +63,8 @@ function AppContent() {
   }
 
   if (!user) {
-    console.log('Showing auth form')
-    return (
-      <AuthForm
-        mode={authMode}
-        onToggleMode={() => setAuthMode(authMode === 'signin' ? 'signup' : 'signin')}
-      />
-    )
+    console.log('Showing login page')
+    return <LoginPage />
   }
 
   console.log('Showing main layout')
