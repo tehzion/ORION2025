@@ -75,6 +75,10 @@ export function TeamDashboard() {
   const { globalRole } = useAuth()
 
   const canManageTeam = globalRole === 'super_admin' || globalRole === 'admin'
+  const canInviteMembers = globalRole === 'super_admin' || globalRole === 'admin'
+  const canEditMembers = globalRole === 'super_admin' || globalRole === 'admin'
+  const canRemoveMembers = globalRole === 'super_admin'
+  const canViewTeam = globalRole === 'super_admin' || globalRole === 'admin' || globalRole === 'developer'
 
   // Search filters configuration
   const searchFilters = [
@@ -178,7 +182,7 @@ export function TeamDashboard() {
           <p className="text-slate-400">Manage your team members and their roles</p>
         </div>
         <div className="flex items-center space-x-3">
-          {canManageTeam && (
+          {canInviteMembers && (
             <button 
               onClick={() => setShowInviteForm(true)}
               className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center space-x-2"
@@ -328,14 +332,16 @@ export function TeamDashboard() {
               )}
             </div>
             
-            {canManageTeam && (
+            {canEditMembers && (
               <div className="flex space-x-2 pt-4 border-t border-slate-700">
                 <button className="text-purple-400 hover:text-purple-300 text-sm font-medium">
                   Edit
                 </button>
-                <button className="text-red-400 hover:text-red-300 text-sm font-medium">
-                  Remove
-                </button>
+                {canRemoveMembers && (
+                  <button className="text-red-400 hover:text-red-300 text-sm font-medium">
+                    Remove
+                  </button>
+                )}
               </div>
             )}
           </div>

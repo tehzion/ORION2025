@@ -4,6 +4,11 @@ import { useAuth } from '../../contexts/AuthContext'
 
 export function ProfileSettings() {
   const { user, profile, updateProfile, updatePassword, globalRole } = useAuth()
+
+  // Role-based permissions
+  const canEditProfile = globalRole === 'super_admin' || globalRole === 'admin' || globalRole === 'developer' || globalRole === 'client'
+  const canChangePassword = globalRole === 'super_admin' || globalRole === 'admin' || globalRole === 'developer' || globalRole === 'client'
+  const canViewAdvancedSettings = globalRole === 'super_admin' || globalRole === 'admin'
   const [fullName, setFullName] = useState('')
   const [timezone, setTimezone] = useState('')
   const [loading, setLoading] = useState(false)
@@ -171,8 +176,18 @@ export function ProfileSettings() {
     }
   }
 
-  // Get available timezones
-  const availableTimezones = Intl.supportedValuesOf('timeZone')
+  // Get available timezones (common ones for demo)
+  const availableTimezones = [
+    'UTC',
+    'America/New_York',
+    'America/Chicago',
+    'America/Denver',
+    'America/Los_Angeles',
+    'Europe/London',
+    'Europe/Paris',
+    'Asia/Tokyo',
+    'Australia/Sydney'
+  ]
 
   return (
     <div className="p-6 max-w-4xl mx-auto">

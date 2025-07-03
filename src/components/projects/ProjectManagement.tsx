@@ -130,6 +130,10 @@ export function ProjectManagement() {
   const { globalRole } = useAuth()
 
   const canManageProjects = globalRole === 'super_admin' || globalRole === 'admin'
+  const canViewProjects = globalRole === 'super_admin' || globalRole === 'admin' || globalRole === 'developer' || globalRole === 'client'
+  const canCreateProjects = globalRole === 'super_admin' || globalRole === 'admin'
+  const canEditProjects = globalRole === 'super_admin' || globalRole === 'admin'
+  const canDeleteProjects = globalRole === 'super_admin'
 
   // Search filters configuration
   const searchFilters = [
@@ -212,7 +216,7 @@ export function ProjectManagement() {
               <FolderOpen className="h-4 w-4" />
             </button>
           </div>
-          {canManageProjects && (
+          {canCreateProjects && (
             <button 
               onClick={() => setShowCreateForm(true)}
               className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center space-x-2"
@@ -334,14 +338,16 @@ export function ProjectManagement() {
               </div>
             </div>
             
-            {canManageProjects && (
+            {canEditProjects && (
               <div className="flex space-x-2 pt-4 border-t border-slate-700">
                 <button className="text-purple-400 hover:text-purple-300 text-sm font-medium">
                   Edit
                 </button>
-                <button className="text-red-400 hover:text-red-300 text-sm font-medium">
-                  Delete
-                </button>
+                {canDeleteProjects && (
+                  <button className="text-red-400 hover:text-red-300 text-sm font-medium">
+                    Delete
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -349,7 +355,7 @@ export function ProjectManagement() {
       </div>
 
       {/* Create Project Modal */}
-      {showCreateForm && canManageProjects && (
+      {showCreateForm && canCreateProjects && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 max-w-md w-full">
             <div className="flex items-center justify-between mb-6">

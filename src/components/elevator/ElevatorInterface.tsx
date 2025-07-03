@@ -21,7 +21,9 @@ export function ElevatorInterface({ projectId, onBackToProjects }: ElevatorInter
   const [showTaskForm, setShowTaskForm] = useState(false)
   const [showInviteMemberForm, setShowInviteMemberForm] = useState(false)
   const [userRoleInProject, setUserRoleInProject] = useState<ProjectMember['role'] | null>(null)
-  const { user } = useAuth()
+  const { user, globalRole } = useAuth()
+
+
 
   useEffect(() => {
     if (user) {
@@ -269,14 +271,12 @@ export function ElevatorInterface({ projectId, onBackToProjects }: ElevatorInter
     }
   ]
 
-  // Check if user can create tasks (owner, developer)
-  const canCreateTasks = userRoleInProject && ['owner', 'developer'].includes(userRoleInProject)
-
-  // Check if user can review tasks (owner, client)
-  const canReviewTasks = userRoleInProject && ['owner', 'client'].includes(userRoleInProject)
-
-  // Check if user can invite members (owner only)
-  const canInviteMembers = userRoleInProject === 'owner'
+  // Use global role permissions for demo mode
+  const canCreateTasks = globalRole === 'super_admin' || globalRole === 'admin' || globalRole === 'developer'
+  const canEditTasks = globalRole === 'super_admin' || globalRole === 'admin' || globalRole === 'developer'
+  const canDeleteTasks = globalRole === 'super_admin' || globalRole === 'admin'
+  const canReviewTasks = globalRole === 'super_admin' || globalRole === 'admin' || globalRole === 'client'
+  const canInviteMembers = globalRole === 'super_admin' || globalRole === 'admin'
 
   if (loading) {
     return (

@@ -10,18 +10,38 @@ interface SidebarProps {
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   const { signOut, user, profile, globalRole } = useAuth()
 
-  const menuItems = [
+  // Base menu items for all users
+  const baseMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'projects', label: 'Projects', icon: FolderOpen },
-    { id: 'team', label: 'Team', icon: Users },
-    { id: 'support', label: 'Support', icon: Headphones },
-    { id: 'settings', label: 'Settings', icon: Settings },
   ]
 
-  // Add super admin specific menu items
-  if (globalRole === 'super_admin') {
-    menuItems.splice(-1, 0, { id: 'admin', label: 'Admin Panel', icon: Shield })
+  // Role-based menu items
+  const getMenuItems = () => {
+    const items = [...baseMenuItems]
+
+    // Projects - available to all authenticated users
+    items.push({ id: 'projects', label: 'Projects', icon: FolderOpen })
+
+    // Team management - only for admins and super admins
+    if (globalRole === 'super_admin' || globalRole === 'admin') {
+      items.push({ id: 'team', label: 'Team', icon: Users })
+    }
+
+    // Support - available to all users
+    items.push({ id: 'support', label: 'Support', icon: Headphones })
+
+    // Admin Panel - only for super admins
+    if (globalRole === 'super_admin') {
+      items.push({ id: 'admin', label: 'Admin Panel', icon: Shield })
+    }
+
+    // Settings - available to all users
+    items.push({ id: 'settings', label: 'Settings', icon: Settings })
+
+    return items
   }
+
+  const menuItems = getMenuItems()
 
   const getUserInitials = (name: string | null | undefined, email: string | undefined) => {
     if (name && name.trim()) {
@@ -93,9 +113,19 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
               <p className="text-white text-sm font-medium truncate">
                 {profile?.full_name || user?.email?.split('@')[0] || 'User'}
               </p>
-              {globalRole === 'super_admin' && (
-                <div className="bg-purple-500/20 px-2 py-0.5 rounded-full">
-                  <span className="text-purple-400 text-xs font-medium">Admin</span>
+              {globalRole && (
+                <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                  globalRole === 'super_admin' ? 'bg-yellow-500/20 text-yellow-400' :
+                  globalRole === 'admin' ? 'bg-blue-500/20 text-blue-400' :
+                  globalRole === 'developer' ? 'bg-green-500/20 text-green-400' :
+                  globalRole === 'client' ? 'bg-purple-500/20 text-purple-400' :
+                  'bg-slate-500/20 text-slate-400'
+                }`}>
+                  {globalRole === 'super_admin' ? 'Super Admin' :
+                   globalRole === 'admin' ? 'Admin' :
+                   globalRole === 'developer' ? 'Developer' :
+                   globalRole === 'client' ? 'Client' :
+                   globalRole === 'viewer' ? 'Viewer' : globalRole}
                 </div>
               )}
             </div>

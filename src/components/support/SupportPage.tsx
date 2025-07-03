@@ -56,6 +56,12 @@ export function SupportPage() {
   const [priorityFilter, setPriorityFilter] = useState<string>('all')
   const { user, globalRole, profile } = useAuth()
 
+  // Role-based permissions
+  const canCreateTickets = globalRole === 'super_admin' || globalRole === 'admin' || globalRole === 'developer' || globalRole === 'client'
+  const canViewAllTickets = globalRole === 'super_admin' || globalRole === 'admin'
+  const canManageTickets = globalRole === 'super_admin' || globalRole === 'admin'
+  const canViewAnalytics = globalRole === 'super_admin' || globalRole === 'admin'
+
   useEffect(() => {
     if (user) {
       fetchTickets()
@@ -344,8 +350,8 @@ export function SupportPage() {
     )
   }
 
-  // Super Admin View
-  if (globalRole === 'super_admin') {
+  // Admin View (Super Admin and Admin)
+  if (canViewAllTickets) {
     return (
       <AdminTicketsDashboard 
         tickets={filteredTickets}
@@ -372,13 +378,15 @@ export function SupportPage() {
           <h1 className="text-3xl font-bold text-white mb-2">Support Center</h1>
           <p className="text-slate-400">Get help with your projects and account</p>
         </div>
-        <button 
-          onClick={() => setShowNewTicketForm(true)}
-          className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-purple-500/25"
-        >
-          <Plus className="h-5 w-5" />
-          <span>New Ticket</span>
-        </button>
+        {canCreateTickets && (
+          <button 
+            onClick={() => setShowNewTicketForm(true)}
+            className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-purple-500/25"
+          >
+            <Plus className="h-5 w-5" />
+            <span>New Ticket</span>
+          </button>
+        )}
       </div>
 
       {/* Stats Cards */}
