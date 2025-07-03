@@ -5,6 +5,7 @@ import { ProjectForm } from './ProjectForm'
 import { SearchBar } from '../common/SearchBar'
 import { Project, supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
+import { DEMO_MODE, DEMO_PROJECTS } from '../../lib/demo'
 
 interface ProjectDashboardProps {
   onProjectSelect: (projectId: string) => void
@@ -26,6 +27,13 @@ export function ProjectDashboard({ onProjectSelect }: ProjectDashboardProps) {
 
   const fetchProjects = async () => {
     if (!user) return
+
+    if (DEMO_MODE) {
+      // Use demo data in demo mode
+      setProjects(DEMO_PROJECTS)
+      setLoading(false)
+      return
+    }
 
     try {
       const { data, error } = await supabase
@@ -77,6 +85,7 @@ export function ProjectDashboard({ onProjectSelect }: ProjectDashboardProps) {
     {
       id: 'status',
       label: 'Status',
+      value: '',
       options: [
         { value: 'active', label: 'Active' },
         { value: 'overdue', label: 'Overdue' },
@@ -86,6 +95,7 @@ export function ProjectDashboard({ onProjectSelect }: ProjectDashboardProps) {
     {
       id: 'progress',
       label: 'Progress',
+      value: '',
       options: [
         { value: 'low', label: 'Low (< 30%)' },
         { value: 'medium', label: 'Medium (30-70%)' },

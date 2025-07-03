@@ -6,6 +6,7 @@ import { InviteMemberForm } from '../project/InviteMemberForm'
 import { SearchBar } from '../common/SearchBar'
 import { Task, ProjectMember, supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
+import { DEMO_MODE, DEMO_TASKS } from '../../lib/demo'
 
 interface ElevatorInterfaceProps {
   projectId: string
@@ -55,6 +56,14 @@ export function ElevatorInterface({ projectId, onBackToProjects }: ElevatorInter
 
   const fetchTasks = async () => {
     if (!user) return
+
+    if (DEMO_MODE) {
+      // Use demo data in demo mode
+      const demoTasksForProject = DEMO_TASKS.filter(task => task.project_id === projectId)
+      setTasks(demoTasksForProject)
+      setLoading(false)
+      return
+    }
 
     try {
       const { data, error } = await supabase
@@ -212,9 +221,9 @@ export function ElevatorInterface({ projectId, onBackToProjects }: ElevatorInter
       (activeFilters.assignee === 'assigned' && task.assignee_id)
     
     const matchesDueDate = !activeFilters.dueDate ||
-      (activeFilters.dueDate === 'overdue' && new Date(task.due_date) < new Date()) ||
-      (activeFilters.dueDate === 'today' && new Date(task.due_date).toDateString() === new Date().toDateString()) ||
-      (activeFilters.dueDate === 'this-week' && (() => {
+      (activeFilters.dueDate === 'overdue' && task.due_date && new Date(task.due_date) < new Date()) ||
+      (activeFilters.dueDate === 'today' && task.due_date && new Date(task.due_date).toDateString() === new Date().toDateString()) ||
+      (activeFilters.dueDate === 'this-week' && task.due_date && (() => {
         const taskDate = new Date(task.due_date)
         const today = new Date()
         const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
@@ -229,6 +238,7 @@ export function ElevatorInterface({ projectId, onBackToProjects }: ElevatorInter
     {
       id: 'status',
       label: 'Status',
+      value: '',
       options: [
         { value: 'pending', label: 'Pending' },
         { value: 'in-progress', label: 'In Progress' },
@@ -240,6 +250,7 @@ export function ElevatorInterface({ projectId, onBackToProjects }: ElevatorInter
     {
       id: 'assignee',
       label: 'Assignee',
+      value: '',
       options: [
         { value: 'me', label: 'Assigned to Me' },
         { value: 'unassigned', label: 'Unassigned' },
@@ -249,6 +260,7 @@ export function ElevatorInterface({ projectId, onBackToProjects }: ElevatorInter
     {
       id: 'dueDate',
       label: 'Due Date',
+      value: '',
       options: [
         { value: 'overdue', label: 'Overdue' },
         { value: 'today', label: 'Due Today' },

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase, Profile } from '../lib/supabase'
+import { DEMO_MODE, DEMO_USER, DEMO_PROFILE } from '../lib/demo'
 
 interface AuthContextType {
   user: User | null
@@ -93,6 +94,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
+    if (DEMO_MODE) {
+      // Demo mode - auto login with mock user
+      setUser({
+        ...DEMO_USER,
+        app_metadata: {},
+        user_metadata: {},
+        aud: 'authenticated',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        email_confirmed_at: new Date().toISOString(),
+        phone_confirmed_at: undefined,
+        last_sign_in_at: new Date().toISOString(),
+        role: 'authenticated',
+        confirmation_sent_at: undefined,
+        recovery_sent_at: undefined,
+        email_change_confirm_status: 0,
+        banned_until: undefined,
+        reauthentication_sent_at: undefined,
+        reauthentication_confirm_status: 0
+      } as unknown as User)
+      setProfile(DEMO_PROFILE)
+      setLoading(false)
+      return
+    }
+
     // Get initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session)

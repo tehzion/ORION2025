@@ -6,6 +6,7 @@ import { ElevatorInterface } from '../elevator/ElevatorInterface'
 import { ProfileSettings } from '../profile/ProfileSettings'
 import { SupportPage } from '../support/SupportPage'
 import { useAuth } from '../../contexts/AuthContext'
+import DemoBanner from '../common/DemoBanner'
 
 export function MainLayout() {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -101,6 +102,7 @@ export function MainLayout() {
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
       <MobileNav activeTab={activeTab} onTabChange={setActiveTab} />
       <main className="flex-1 overflow-auto lg:ml-0">
+        <DemoBanner />
         {renderContent()}
       </main>
     </div>
