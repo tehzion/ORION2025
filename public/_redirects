@@ -1,1 +1,8 @@
-/*    /index.html   200 
+/*    /index.html   200
+
+# Handle specific routes
+/dashboard    /index.html   200
+/projects     /index.html   200
+/support      /index.html   200
+/settings     /index.html   200
+/admin        /index.html   200 
