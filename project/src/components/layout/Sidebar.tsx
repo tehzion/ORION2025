@@ -34,7 +34,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   }
 
   return (
-    <div className="bg-slate-900 border-r border-slate-800 w-64 flex flex-col h-full">
+    <div className="bg-slate-900 border-r border-slate-800 w-64 flex flex-col h-full hidden lg:flex">
       {/* Logo */}
       <div className="p-6 border-b border-slate-800">
         <div className="flex items-center space-x-3">

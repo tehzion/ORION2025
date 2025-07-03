@@ -31,19 +31,19 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
   return (
     <div
       onClick={onClick}
-      className="bg-slate-800 border border-slate-700 rounded-xl p-6 hover:border-purple-500 transition-all duration-200 cursor-pointer group"
+      className="bg-slate-800 border border-slate-700 rounded-xl p-4 sm:p-6 hover:border-purple-500 transition-all duration-200 cursor-pointer group"
     >
-      <div className="flex justify-between items-start mb-4">
-        <h3 className="text-lg font-semibold text-white group-hover:text-purple-400 transition-colors">
+      <div className="flex justify-between items-start mb-3 sm:mb-4">
+        <h3 className="text-base sm:text-lg font-semibold text-white group-hover:text-purple-400 transition-colors line-clamp-1">
           {project.name}
         </h3>
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-1 flex-shrink-0">
           <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-          <span className="text-xs text-slate-400">Active</span>
+          <span className="text-xs text-slate-400 hidden sm:inline">Active</span>
         </div>
       </div>
 
-      <p className="text-slate-400 text-sm mb-4 line-clamp-2">
+      <p className="text-slate-400 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2">
         {project.description}
       </p>
 
@@ -66,12 +66,14 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
       {/* Footer */}
       <div className="flex justify-between items-center text-xs text-slate-400">
         <div className="flex items-center space-x-1">
-          <Clock className="h-3 w-3" />
-          <span>{formatDate(project.last_activity, profile?.timezone)}</span>
+          <Clock className="h-3 w-3 flex-shrink-0" />
+          <span className="hidden sm:inline">{formatDate(project.last_activity, profile?.timezone)}</span>
+          <span className="sm:hidden">{new Date(project.last_activity).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
         </div>
         <div className={`flex items-center space-x-1 ${isOverdue ? 'text-red-400' : ''}`}>
-          <Calendar className="h-3 w-3" />
-          <span>{formatDate(project.deadline, profile?.timezone)}</span>
+          <Calendar className="h-3 w-3 flex-shrink-0" />
+          <span className="hidden sm:inline">{formatDate(project.deadline, profile?.timezone)}</span>
+          <span className="sm:hidden">{new Date(project.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
         </div>
       </div>
     </div>

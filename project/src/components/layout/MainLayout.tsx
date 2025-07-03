@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Sidebar } from './Sidebar'
+import { MobileNav } from './MobileNav'
 import { ProjectDashboard } from '../dashboard/ProjectDashboard'
 import { ElevatorInterface } from '../elevator/ElevatorInterface'
 import { ProfileSettings } from '../profile/ProfileSettings'
@@ -98,7 +99,8 @@ export function MainLayout() {
   return (
     <div className="flex h-screen bg-slate-900">
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
-      <main className="flex-1 overflow-auto">
+      <MobileNav activeTab={activeTab} onTabChange={setActiveTab} />
+      <main className="flex-1 overflow-auto lg:ml-0">
         {renderContent()}
       </main>
     </div>

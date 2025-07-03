@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { Plus, Search, Filter, Grid, List, CheckCircle, Sparkles, ArrowRight, Users, Calendar, Target } from 'lucide-react'
+import { Plus, Grid, List, CheckCircle, Sparkles, ArrowRight, Users, Calendar, Target } from 'lucide-react'
 import { ProjectCard } from './ProjectCard'
 import { ProjectForm } from './ProjectForm'
+import { SearchBar } from '../common/SearchBar'
 import { Project, supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -13,6 +14,7 @@ export function ProjectDashboard({ onProjectSelect }: ProjectDashboardProps) {
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [activeFilters, setActiveFilters] = useState<Record<string, string>>({})
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [showProjectForm, setShowProjectForm] = useState(false)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
@@ -51,10 +53,46 @@ export function ProjectDashboard({ onProjectSelect }: ProjectDashboardProps) {
     }, 3000)
   }
 
-  const filteredProjects = projects.filter(project =>
-    project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    project.description.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  // Enhanced filtering with multiple criteria
+  const filteredProjects = projects.filter(project => {
+    const matchesSearch = searchTerm === '' || 
+      project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.description.toLowerCase().includes(searchTerm.toLowerCase())
+    
+    const matchesStatus = !activeFilters.status || 
+      (activeFilters.status === 'overdue' && new Date(project.deadline) < new Date()) ||
+      (activeFilters.status === 'active' && new Date(project.deadline) >= new Date()) ||
+      (activeFilters.status === 'completed' && project.completion_percentage === 100)
+    
+    const matchesProgress = !activeFilters.progress ||
+      (activeFilters.progress === 'low' && project.completion_percentage < 30) ||
+      (activeFilters.progress === 'medium' && project.completion_percentage >= 30 && project.completion_percentage < 70) ||
+      (activeFilters.progress === 'high' && project.completion_percentage >= 70)
+    
+    return matchesSearch && matchesStatus && matchesProgress
+  })
+
+  // Search filters configuration
+  const searchFilters = [
+    {
+      id: 'status',
+      label: 'Status',
+      options: [
+        { value: 'active', label: 'Active' },
+        { value: 'overdue', label: 'Overdue' },
+        { value: 'completed', label: 'Completed' }
+      ]
+    },
+    {
+      id: 'progress',
+      label: 'Progress',
+      options: [
+        { value: 'low', label: 'Low (< 30%)' },
+        { value: 'medium', label: 'Medium (30-70%)' },
+        { value: 'high', label: 'High (> 70%)' }
+      ]
+    }
+  ]
 
   // Mock data for demonstration
   const mockProjects: Project[] = [
@@ -118,37 +156,39 @@ export function ProjectDashboard({ onProjectSelect }: ProjectDashboardProps) {
       )}
 
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-8">
+        <div className="flex-1">
           <div className="flex items-center space-x-3 mb-2">
-            <h1 className="text-3xl font-bold text-white">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">
               {isFirstTime ? 'Welcome to Orion' : 'Project Dashboard'}
             </h1>
             {isFirstTime && (
               <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-full p-1">
-                <Sparkles className="h-5 w-5 text-white" />
+                <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
             )}
           </div>
-          <p className="text-slate-400">
+          <p className="text-slate-400 text-sm sm:text-base">
             {isFirstTime 
               ? `Welcome ${profile?.full_name || user?.email?.split('@')[0] || 'there'}! Let's create your first project to get started.`
               : 'Manage and track your projects'
             }
           </p>
         </div>
-        <button 
-          onClick={() => setShowProjectForm(true)}
-          className={`${
-            isFirstTime 
-              ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 text-lg shadow-xl hover:shadow-purple-500/25 animate-pulse' 
-              : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 shadow-lg hover:shadow-purple-500/25'
-          } rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center space-x-2`}
-        >
-          <Plus className={`${isFirstTime ? 'h-6 w-6' : 'h-5 w-5'}`} />
-          <span>{isFirstTime ? 'Create Your First Project' : 'New Project'}</span>
-          {isFirstTime && <ArrowRight className="h-5 w-5" />}
-        </button>
+        <div className="flex-shrink-0">
+          <button 
+            onClick={() => setShowProjectForm(true)}
+            className={`${
+              isFirstTime 
+                ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg shadow-xl hover:shadow-purple-500/25 animate-pulse' 
+                : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 sm:px-6 py-2 sm:py-3 shadow-lg hover:shadow-purple-500/25'
+            } rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center space-x-2 w-full sm:w-auto justify-center`}
+          >
+            <Plus className={`${isFirstTime ? 'h-5 w-5 sm:h-6 sm:w-6' : 'h-4 w-4 sm:h-5 sm:w-5'}`} />
+            <span className="whitespace-nowrap">{isFirstTime ? 'Create Your First Project' : 'New Project'}</span>
+            {isFirstTime && <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />}
+          </button>
+        </div>
       </div>
 
       {/* First Time User Onboarding */}
@@ -162,29 +202,29 @@ export function ProjectDashboard({ onProjectSelect }: ProjectDashboardProps) {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 text-center">
-              <div className="bg-purple-500/20 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                <Target className="h-6 w-6 text-purple-400" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
+            <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 sm:p-6 text-center">
+              <div className="bg-purple-500/20 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <Target className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
               </div>
-              <h3 className="text-white font-semibold mb-2">Create Projects</h3>
-              <p className="text-slate-400 text-sm">Organize your work into manageable projects with clear goals and deadlines.</p>
+              <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">Create Projects</h3>
+              <p className="text-slate-400 text-xs sm:text-sm">Organize your work into manageable projects with clear goals and deadlines.</p>
             </div>
             
-            <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 text-center">
-              <div className="bg-blue-500/20 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                <Users className="h-6 w-6 text-blue-400" />
+            <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 sm:p-6 text-center">
+              <div className="bg-blue-500/20 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <Users className="h-5 w-5 sm:h-6 sm:w-6 text-blue-400" />
               </div>
-              <h3 className="text-white font-semibold mb-2">Invite Team Members</h3>
-              <p className="text-slate-400 text-sm">Collaborate with developers, clients, and stakeholders on your projects.</p>
+              <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">Invite Team Members</h3>
+              <p className="text-slate-400 text-xs sm:text-sm">Collaborate with developers, clients, and stakeholders on your projects.</p>
             </div>
             
-            <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 text-center">
-              <div className="bg-green-500/20 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                <Calendar className="h-6 w-6 text-green-400" />
+            <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 sm:p-6 text-center sm:col-span-2 lg:col-span-1">
+              <div className="bg-green-500/20 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-green-400" />
               </div>
-              <h3 className="text-white font-semibold mb-2">Track Progress</h3>
-              <p className="text-slate-400 text-sm">Use the task elevator to visualize progress and manage deliverables.</p>
+              <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">Track Progress</h3>
+              <p className="text-slate-400 text-xs sm:text-sm">Use the task elevator to visualize progress and manage deliverables.</p>
             </div>
           </div>
 
@@ -203,37 +243,68 @@ export function ProjectDashboard({ onProjectSelect }: ProjectDashboardProps) {
 
       {/* Controls - Only show if user has projects */}
       {!isFirstTime && (
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
-            <input
-              type="text"
-              placeholder="Search projects..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            />
-          </div>
-          <div className="flex space-x-2">
-            <button className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-300 hover:text-white hover:border-slate-600 transition-colors flex items-center space-x-2">
-              <Filter className="h-5 w-5" />
-              <span>Filter</span>
-            </button>
-            <div className="flex bg-slate-800 border border-slate-700 rounded-lg p-1">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded ${viewMode === 'grid' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'}`}
-              >
-                <Grid className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded ${viewMode === 'list' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'}`}
-              >
-                <List className="h-4 w-4" />
-              </button>
+        <div className="space-y-4 mb-6">
+          {/* Search and Filters */}
+          <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex-1">
+              <SearchBar
+                placeholder="Search projects by name or description..."
+                value={searchTerm}
+                onChange={setSearchTerm}
+                filters={searchFilters}
+                onFilterChange={setActiveFilters}
+                showKeyboardShortcuts={true}
+              />
+            </div>
+            
+            {/* View Mode Toggle */}
+            <div className="flex items-center justify-center lg:justify-end">
+              <div className="flex bg-slate-800 border border-slate-700 rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded transition-colors ${
+                    viewMode === 'grid' 
+                      ? 'bg-purple-600 text-white' 
+                      : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                  }`}
+                  title="Grid view"
+                >
+                  <Grid className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded transition-colors ${
+                    viewMode === 'list' 
+                      ? 'bg-purple-600 text-white' 
+                      : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                  }`}
+                  title="List view"
+                >
+                  <List className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           </div>
+
+          {/* Results Summary */}
+          {filteredProjects.length > 0 && (
+            <div className="flex items-center justify-between text-sm text-slate-400">
+              <span>
+                Showing {filteredProjects.length} of {projects.length} projects
+                {(searchTerm || Object.keys(activeFilters).length > 0) && (
+                  <button
+                    onClick={() => {
+                      setSearchTerm('')
+                      setActiveFilters({})
+                    }}
+                    className="ml-2 text-purple-400 hover:text-purple-300 underline"
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </span>
+            </div>
+          )}
         </div>
       )}
 
@@ -253,9 +324,9 @@ export function ProjectDashboard({ onProjectSelect }: ProjectDashboardProps) {
           </button>
         </div>
       ) : !isFirstTime ? (
-        <div className={`grid gap-6 ${
+        <div className={`grid gap-4 sm:gap-6 ${
           viewMode === 'grid' 
-            ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
+            ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
             : 'grid-cols-1'
         }`}>
           {displayProjects.map((project) => (

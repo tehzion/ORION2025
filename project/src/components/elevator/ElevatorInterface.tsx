@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { ArrowLeft, Plus, Filter, Search, UserPlus } from 'lucide-react'
+import { ArrowLeft, Plus, UserPlus } from 'lucide-react'
 import { TaskFloor } from './TaskFloor'
 import { TaskForm } from './TaskForm'
 import { InviteMemberForm } from '../project/InviteMemberForm'
+import { SearchBar } from '../common/SearchBar'
 import { Task, ProjectMember, supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -15,6 +16,7 @@ export function ElevatorInterface({ projectId, onBackToProjects }: ElevatorInter
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [activeFilters, setActiveFilters] = useState<Record<string, string>>({})
   const [showTaskForm, setShowTaskForm] = useState(false)
   const [showInviteMemberForm, setShowInviteMemberForm] = useState(false)
   const [userRoleInProject, setUserRoleInProject] = useState<ProjectMember['role'] | null>(null)
@@ -196,10 +198,64 @@ export function ElevatorInterface({ projectId, onBackToProjects }: ElevatorInter
 
   const displayTasks = tasks.length > 0 ? tasks : mockTasks
 
-  const filteredTasks = displayTasks.filter(task =>
-    task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    task.description.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  // Enhanced filtering with multiple criteria
+  const filteredTasks = displayTasks.filter(task => {
+    const matchesSearch = searchTerm === '' || 
+      task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      task.description.toLowerCase().includes(searchTerm.toLowerCase())
+    
+    const matchesStatus = !activeFilters.status || task.status === activeFilters.status
+    
+    const matchesAssignee = !activeFilters.assignee || 
+      (activeFilters.assignee === 'me' && task.assignee_id === user?.id) ||
+      (activeFilters.assignee === 'unassigned' && !task.assignee_id) ||
+      (activeFilters.assignee === 'assigned' && task.assignee_id)
+    
+    const matchesDueDate = !activeFilters.dueDate ||
+      (activeFilters.dueDate === 'overdue' && new Date(task.due_date) < new Date()) ||
+      (activeFilters.dueDate === 'today' && new Date(task.due_date).toDateString() === new Date().toDateString()) ||
+      (activeFilters.dueDate === 'this-week' && (() => {
+        const taskDate = new Date(task.due_date)
+        const today = new Date()
+        const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
+        return taskDate >= today && taskDate <= weekFromNow
+      })())
+    
+    return matchesSearch && matchesStatus && matchesAssignee && matchesDueDate
+  })
+
+  // Search filters configuration
+  const searchFilters = [
+    {
+      id: 'status',
+      label: 'Status',
+      options: [
+        { value: 'pending', label: 'Pending' },
+        { value: 'in-progress', label: 'In Progress' },
+        { value: 'ready-for-review', label: 'Ready for Review' },
+        { value: 'revisions-requested', label: 'Revisions Requested' },
+        { value: 'approved', label: 'Approved' }
+      ]
+    },
+    {
+      id: 'assignee',
+      label: 'Assignee',
+      options: [
+        { value: 'me', label: 'Assigned to Me' },
+        { value: 'unassigned', label: 'Unassigned' },
+        { value: 'assigned', label: 'Assigned' }
+      ]
+    },
+    {
+      id: 'dueDate',
+      label: 'Due Date',
+      options: [
+        { value: 'overdue', label: 'Overdue' },
+        { value: 'today', label: 'Due Today' },
+        { value: 'this-week', label: 'Due This Week' }
+      ]
+    }
+  ]
 
   // Check if user can create tasks (owner, developer)
   const canCreateTasks = userRoleInProject && ['owner', 'developer'].includes(userRoleInProject)
@@ -222,18 +278,19 @@ export function ElevatorInterface({ projectId, onBackToProjects }: ElevatorInter
     <div className="h-full flex flex-col bg-slate-900">
       {/* Header */}
       <div className="bg-slate-800 border-b border-slate-700 p-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
           <div className="flex items-center space-x-4">
             <button
               onClick={onBackToProjects}
               className="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors"
             >
-              <ArrowLeft className="h-5 w-5" />
-              <span>Back to Projects</span>
+              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+              <span className="hidden sm:inline">Back to Projects</span>
+              <span className="sm:hidden">Back</span>
             </button>
-            <div className="h-6 w-px bg-slate-600"></div>
+            <div className="h-6 w-px bg-slate-600 hidden sm:block"></div>
             <div className="flex items-center space-x-3">
-              <h1 className="text-2xl font-bold text-white">Task Elevator</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-white">Task Elevator</h1>
               {userRoleInProject && (
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   userRoleInProject === 'owner' 
@@ -249,50 +306,67 @@ export function ElevatorInterface({ projectId, onBackToProjects }: ElevatorInter
               )}
             </div>
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             {canInviteMembers && (
               <button 
                 onClick={() => setShowInviteMemberForm(true)}
-                className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 border border-slate-600"
+                className="bg-slate-700 hover:bg-slate-600 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 border border-slate-600 text-sm sm:text-base"
               >
                 <UserPlus className="h-4 w-4" />
-                <span>Invite Member</span>
+                <span className="hidden sm:inline">Invite Member</span>
+                <span className="sm:hidden">Invite</span>
               </button>
             )}
             {canCreateTasks && (
               <button 
                 onClick={() => setShowTaskForm(true)}
-                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center space-x-2"
+                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center space-x-2 text-sm sm:text-base"
               >
                 <Plus className="h-4 w-4" />
-                <span>New Task</span>
+                <span className="hidden sm:inline">New Task</span>
+                <span className="sm:hidden">Task</span>
               </button>
             )}
           </div>
         </div>
 
         {/* Controls */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
-            <input
-              type="text"
-              placeholder="Search tasks..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            />
-          </div>
-          <button className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-slate-300 hover:text-white hover:border-slate-500 transition-colors flex items-center space-x-2">
-            <Filter className="h-4 w-4" />
-            <span>Filter</span>
-          </button>
+        <div className="space-y-4">
+          <SearchBar
+            placeholder="Search tasks by title or description..."
+            value={searchTerm}
+            onChange={setSearchTerm}
+            filters={searchFilters}
+            onFilterChange={setActiveFilters}
+            showKeyboardShortcuts={true}
+            className="max-w-none"
+          />
+          
+          {/* Results Summary */}
+          {filteredTasks.length > 0 && (
+            <div className="flex items-center justify-between text-sm text-slate-400">
+              <span>
+                Showing {filteredTasks.length} of {displayTasks.length} tasks
+                {(searchTerm || Object.keys(activeFilters).length > 0) && (
+                  <button
+                    onClick={() => {
+                      setSearchTerm('')
+                      setActiveFilters({})
+                    }}
+                    className="ml-2 text-purple-400 hover:text-purple-300 underline"
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Elevator Shaft */}
       <div className="flex-1 overflow-auto">
-        <div className="max-w-4xl mx-auto p-6">
+        <div className="max-w-4xl mx-auto p-4 sm:p-6">
           {filteredTasks.length === 0 ? (
             <div className="text-center py-12">
               <div className="bg-slate-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
