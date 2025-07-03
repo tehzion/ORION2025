@@ -29,7 +29,8 @@ export const DEMO_PROJECTS = [
     deadline: '2024-02-28T23:59:59Z',
     created_at: '2024-01-01T00:00:00Z',
     updated_at: '2024-01-15T10:30:00Z',
-    owner_id: 'demo-user-123'
+    owner_id: 'demo-user-123',
+    status: 'active' as const
   },
   {
     id: '2',
@@ -40,7 +41,8 @@ export const DEMO_PROJECTS = [
     deadline: '2024-03-15T23:59:59Z',
     created_at: '2024-01-05T00:00:00Z',
     updated_at: '2024-01-14T16:45:00Z',
-    owner_id: 'demo-user-123'
+    owner_id: 'demo-user-123',
+    status: 'active' as const
   },
   {
     id: '3',
@@ -51,7 +53,8 @@ export const DEMO_PROJECTS = [
     deadline: '2024-01-30T23:59:59Z',
     created_at: '2024-01-10T00:00:00Z',
     updated_at: '2024-01-16T09:15:00Z',
-    owner_id: 'demo-user-123'
+    owner_id: 'demo-user-123',
+    status: 'active' as const
   }
 ]
 

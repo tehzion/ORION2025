@@ -5,6 +5,9 @@ import { ProjectDashboard } from '../dashboard/ProjectDashboard'
 import { ElevatorInterface } from '../elevator/ElevatorInterface'
 import { ProfileSettings } from '../profile/ProfileSettings'
 import { SupportPage } from '../support/SupportPage'
+import { ProjectManagement } from '../projects/ProjectManagement'
+import { TeamDashboard } from '../team/TeamDashboard'
+import { UserSwitcher } from '../common/UserSwitcher'
 import { useAuth } from '../../contexts/AuthContext'
 import DemoBanner from '../common/DemoBanner'
 
@@ -36,19 +39,9 @@ export function MainLayout() {
           <ProjectDashboard onProjectSelect={handleProjectSelect} />
         )
       case 'projects':
-        return (
-          <div className="p-6">
-            <h1 className="text-3xl font-bold text-white mb-4">Projects</h1>
-            <p className="text-slate-400">Project management interface coming soon...</p>
-          </div>
-        )
+        return <ProjectManagement />
       case 'team':
-        return (
-          <div className="p-6">
-            <h1 className="text-3xl font-bold text-white mb-4">Team</h1>
-            <p className="text-slate-400">Team management interface coming soon...</p>
-          </div>
-        )
+        return <TeamDashboard />
       case 'support':
         return <SupportPage />
       case 'admin':
@@ -105,6 +98,7 @@ export function MainLayout() {
         <DemoBanner />
         {renderContent()}
       </main>
+      <UserSwitcher />
     </div>
   )
 }

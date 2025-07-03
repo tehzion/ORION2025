@@ -15,6 +15,7 @@ interface AuthContextType {
   updateProfile: (fullName: string, timezone?: string | null) => Promise<void>
   updatePassword: (newPassword: string) => Promise<void>
   refreshProfile: () => Promise<void>
+  setGlobalRole: (role: string) => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -32,6 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [globalRole, setGlobalRole] = useState<string | null>(null)
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -120,7 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }: { data: { session: Session | null } }) => {
       setSession(session)
       setUser(session?.user ?? null)
       
@@ -135,7 +137,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event: string, session: Session | null) => {
       setSession(session)
       setUser(session?.user ?? null)
       
@@ -183,7 +185,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     session,
     profile,
-    globalRole: profile?.global_role || null,
+    globalRole: globalRole || profile?.global_role || null,
     loading,
     signIn,
     signUp,
@@ -191,6 +193,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     updateProfile,
     updatePassword,
     refreshProfile,
+    setGlobalRole,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
