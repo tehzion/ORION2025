@@ -1,6 +1,7 @@
-import React from 'react'
-import { Building2, Home, FolderOpen, Users, Settings, LogOut, Shield, Headphones, MessageSquare, BarChart3 } from 'lucide-react'
+import React, { useState } from 'react'
+import { Building2, Home, FolderOpen, Users, Settings, LogOut, Shield, Headphones, MessageSquare, BarChart3, ArrowUpDown, HelpCircle, MessageCircle, GitBranch, User, Menu, X } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
+import { useLocation, Link } from 'react-router-dom'
 
 interface SidebarProps {
   activeTab: string
@@ -9,6 +10,9 @@ interface SidebarProps {
 
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   const { signOut, user, profile, globalRole } = useAuth()
+  const location = useLocation()
+  const pathname = location.pathname
+  const [isCollapsed, setIsCollapsed] = useState(false)
 
   // Base menu items for all users
   const baseMenuItems = [
@@ -57,50 +61,50 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
     return 'U'
   }
 
+  const navigation = [
+    { name: 'Dashboard', href: '/', icon: Home, current: pathname === '/' },
+    { name: 'Elevator', href: '/elevator', icon: ArrowUpDown, current: pathname === '/elevator' },
+    { name: 'Support', href: '/support', icon: HelpCircle, current: pathname === '/support' },
+    { name: 'Team', href: '/team', icon: Users, current: pathname === '/team' },
+    { name: 'Chat', href: '/chat', icon: MessageCircle, current: pathname === '/chat' },
+    { name: 'Project Status', href: '/project-status', icon: GitBranch, current: pathname === '/project-status' },
+    { name: 'Profile', href: '/profile', icon: User, current: pathname === '/profile' },
+    { name: 'Admin', href: '/admin', icon: Settings, current: pathname === '/admin' },
+  ];
+
   return (
-    <div className="bg-slate-900 border-r border-slate-800 w-64 flex flex-col h-full hidden lg:flex">
-      {/* Logo */}
-      <div className="p-6 border-b border-slate-800">
-        <div className="flex items-center space-x-3">
-          <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-2">
-            <Building2 className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <span className="text-xl font-bold text-white">Orion</span>
-            {globalRole === 'super_admin' && (
-              <div className="flex items-center space-x-1 mt-1">
-                <Shield className="h-3 w-3 text-purple-400" />
-                <span className="text-xs text-purple-400 font-medium">Mojo Digital</span>
-              </div>
-            )}
-          </div>
-        </div>
+    <div className={`bg-white shadow-lg transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`}>
+      <div className="flex items-center justify-between p-4 border-b">
+        {!isCollapsed && (
+          <h1 className="text-xl font-bold text-gray-900">Orion</h1>
+        )}
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+        >
+          {isCollapsed ? <Menu className="w-5 h-5" /> : <X className="w-5 h-5" />}
+        </button>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 p-4">
+      <nav className="p-4">
         <ul className="space-y-2">
-          {menuItems.map((item) => {
-            const Icon = item.icon
-            return (
-              <li key={item.id}>
-                <button
-                  onClick={() => onTabChange(item.id)}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                    activeTab === item.id
-                      ? 'bg-purple-600 text-white'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800'
-                  }`}
-                >
-                  <Icon className="h-5 w-5" />
-                  <span>{item.label}</span>
-                  {item.id === 'admin' && (
-                    <Shield className="h-3 w-3 text-purple-400 ml-auto" />
-                  )}
-                </button>
-              </li>
-            )
-          })}
+          {navigation.map((item) => (
+            <li key={item.name}>
+              <Link
+                to={item.href}
+                className={`flex items-center px-3 py-2 rounded-lg transition-colors ${
+                  item.current
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <item.icon className="w-5 h-5" />
+                {!isCollapsed && (
+                  <span className="ml-3">{item.name}</span>
+                )}
+              </Link>
+            </li>
+          ))}
         </ul>
       </nav>
 

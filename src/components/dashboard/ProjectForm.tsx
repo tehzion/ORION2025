@@ -1,20 +1,22 @@
 import React, { useState } from 'react'
-import { X, Calendar, FileText, AlignLeft, Building2 } from 'lucide-react'
+import { X, Calendar, FileText, AlignLeft, Building2, Save, Plus, X as XIcon } from 'lucide-react'
 import { Project } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 
 interface ProjectFormProps {
   onClose: () => void
   onProjectCreated: (project: Project) => void
+  project?: Project
 }
 
-export function ProjectForm({ onClose, onProjectCreated }: ProjectFormProps) {
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [deadline, setDeadline] = useState('')
+export function ProjectForm({ onClose, onProjectCreated, project }: ProjectFormProps) {
+  const [name, setName] = useState(project?.name || '')
+  const [description, setDescription] = useState(project?.description || '')
+  const [deadline, setDeadline] = useState(project?.deadline || '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const { user } = useAuth()
+  const [newTeamMember, setNewTeamMember] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,7 +28,7 @@ export function ProjectForm({ onClose, onProjectCreated }: ProjectFormProps) {
     try {
       // Create project with local state (no Supabase yet)
       const newProject: Project = {
-        id: `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: project?.id || `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         name: name.trim(),
         description: description.trim(),
         completion_percentage: 0,
@@ -34,7 +36,12 @@ export function ProjectForm({ onClose, onProjectCreated }: ProjectFormProps) {
         deadline: deadline ? new Date(deadline).toISOString() : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // Default to 30 days from now
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        owner_id: user.id
+        owner_id: user.id,
+        status: project?.status || 'active',
+        priority: project?.priority || 'medium',
+        dueDate: project?.dueDate || '',
+        budget: project?.budget ? parseFloat(project.budget) : 0,
+        team: project?.team || []
       }
 
       // Simulate API delay for better UX
@@ -55,6 +62,23 @@ export function ProjectForm({ onClose, onProjectCreated }: ProjectFormProps) {
     return tomorrow.toISOString().split('T')[0]
   }
 
+  const addTeamMember = () => {
+    if (newTeamMember.trim() && !project?.team.includes(newTeamMember.trim())) {
+      onProjectCreated({
+        ...project,
+        team: [...project.team, newTeamMember.trim()]
+      })
+      setNewTeamMember('')
+    }
+  }
+
+  const removeTeamMember = (index: number) => {
+    onProjectCreated({
+      ...project,
+      team: project.team.filter((_, i) => i !== index)
+    })
+  }
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
@@ -64,7 +88,9 @@ export function ProjectForm({ onClose, onProjectCreated }: ProjectFormProps) {
             <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-2">
               <Building2 className="h-5 w-5 text-white" />
             </div>
-            <h2 className="text-xl font-semibold text-white">Create New Project</h2>
+            <h2 className="text-xl font-semibold text-white">
+              {project ? 'Edit Project' : 'Create New Project'}
+            </h2>
           </div>
           <button
             onClick={onClose}
@@ -155,6 +181,49 @@ export function ProjectForm({ onClose, onProjectCreated }: ProjectFormProps) {
                   create tasks, and track progress once the project is set up.
                 </p>
               </div>
+            </div>
+          </div>
+
+          {/* Team Members */}
+          <div>
+            <label className="block text-sm font-medium text-white mb-2">
+              Team Members
+            </label>
+            <div className="flex gap-2 mb-2">
+              <input
+                type="text"
+                value={newTeamMember}
+                onChange={(e) => setNewTeamMember(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTeamMember())}
+                className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="Add team member"
+              />
+              <button
+                type="button"
+                onClick={addTeamMember}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+            
+            {/* Team Members List */}
+            <div className="flex flex-wrap gap-2">
+              {project?.team.map((member, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm"
+                >
+                  <span>{member}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeTeamMember(index)}
+                    className="hover:bg-purple-200 rounded-full p-1"
+                  >
+                    <XIcon className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
 

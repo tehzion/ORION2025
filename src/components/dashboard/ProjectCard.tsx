@@ -1,15 +1,17 @@
-import React from 'react'
-import { Calendar, Clock, Users } from 'lucide-react'
+import React, { useState } from 'react'
+import { Calendar, Clock, Users, MoreVertical, Edit, Trash2, Eye } from 'lucide-react'
 import { Project } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 
 interface ProjectCardProps {
   project: Project
-  onClick: () => void
+  onUpdate: (id: string, updates: Partial<Project>) => void
+  onDelete: (id: string) => void
 }
 
-export function ProjectCard({ project, onClick }: ProjectCardProps) {
+export function ProjectCard({ project, onUpdate, onDelete }: ProjectCardProps) {
   const { profile } = useAuth()
+  const [showMenu, setShowMenu] = useState(false)
 
   const getStatusColor = (percentage: number) => {
     if (percentage >= 80) return 'text-green-400'
@@ -29,10 +31,7 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
   const isOverdue = new Date(project.deadline) < new Date()
 
   return (
-    <div
-      onClick={onClick}
-      className="bg-slate-800 border border-slate-700 rounded-xl p-4 sm:p-6 hover:border-purple-500 transition-all duration-200 cursor-pointer group"
-    >
+    <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 sm:p-6 hover:border-purple-500 transition-all duration-200 cursor-pointer group">
       <div className="flex justify-between items-start mb-3 sm:mb-4">
         <h3 className="text-base sm:text-lg font-semibold text-white group-hover:text-purple-400 transition-colors line-clamp-1">
           {project.name}
@@ -75,6 +74,59 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
           <span className="hidden sm:inline">{formatDate(project.deadline, profile?.timezone)}</span>
           <span className="sm:hidden">{new Date(project.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
         </div>
+      </div>
+
+      {/* Menu Button */}
+      <div className="relative ml-4">
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            setShowMenu(!showMenu)
+          }}
+          className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+        >
+          <MoreVertical className="w-5 h-5 text-gray-400" />
+        </button>
+        
+        {showMenu && (
+          <div className="absolute right-0 top-8 w-48 bg-white rounded-lg shadow-lg border z-10">
+            <div className="py-1">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowMenu(false)
+                  // Add view logic here
+                }}
+                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                View Details
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowMenu(false)
+                  // Add edit logic here
+                }}
+                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Project
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowMenu(false)
+                  onDelete(project.id)
+                }}
+                className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Project
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -73,3 +73,6 @@ CREATE POLICY "Users can delete own comments"
 -- Create index for better query performance
 CREATE INDEX IF NOT EXISTS comments_task_id_idx ON comments(task_id);
 CREATE INDEX IF NOT EXISTS comments_created_at_idx ON comments(created_at DESC);
+
+-- This migration appears to be the initial setup
+-- Let me create a comprehensive project management schema
