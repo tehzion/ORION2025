@@ -63,6 +63,8 @@ export interface Task {
   floor_position: number
   deliverable_link?: string
   review_comments?: string
+  completion_percentage?: number
+  priority?: 'low' | 'medium' | 'high' | 'urgent'
   created_at: string
   updated_at: string
 }

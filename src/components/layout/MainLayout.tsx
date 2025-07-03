@@ -6,6 +6,7 @@ import { ElevatorInterface } from '../elevator/ElevatorInterface'
 import { ProfileSettings } from '../profile/ProfileSettings'
 import { SupportPage } from '../support/SupportPage'
 import { ProjectManagement } from '../projects/ProjectManagement'
+import { ProjectDashboardEnhanced } from '../projects/ProjectDashboardEnhanced'
 import { TeamDashboard } from '../team/TeamDashboard'
 import { ChatSystem } from '../chat/ChatSystem'
 import { SystemSettings } from '../admin/SystemSettings'
@@ -43,6 +44,9 @@ export function MainLayout() {
       case 'projects':
         // Projects accessible to all authenticated users
         return <ProjectManagement />
+      case 'projects-enhanced':
+        // Enhanced project management with file attachments and progress tracking
+        return <ProjectDashboardEnhanced />
       case 'team':
         // Team management only for admins and super admins
         if (globalRole === 'super_admin' || globalRole === 'admin') {

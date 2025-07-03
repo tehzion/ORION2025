@@ -1,5 +1,5 @@
 import React from 'react'
-import { Building2, Home, FolderOpen, Users, Settings, LogOut, Shield, Headphones, MessageSquare } from 'lucide-react'
+import { Building2, Home, FolderOpen, Users, Settings, LogOut, Shield, Headphones, MessageSquare, BarChart3 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 
 interface SidebarProps {
@@ -21,6 +21,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
 
     // Projects - available to all authenticated users
     items.push({ id: 'projects', label: 'Projects', icon: FolderOpen })
+    items.push({ id: 'projects-enhanced', label: 'Enhanced Projects', icon: BarChart3 })
 
     // Team management - only for admins and super admins
     if (globalRole === 'super_admin' || globalRole === 'admin') {
