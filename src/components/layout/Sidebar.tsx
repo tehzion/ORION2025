@@ -1,5 +1,5 @@
 import React from 'react'
-import { Building2, Home, FolderOpen, Users, Settings, LogOut, Shield, Headphones } from 'lucide-react'
+import { Building2, Home, FolderOpen, Users, Settings, LogOut, Shield, Headphones, MessageSquare } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 
 interface SidebarProps {
@@ -26,6 +26,9 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
     if (globalRole === 'super_admin' || globalRole === 'admin') {
       items.push({ id: 'team', label: 'Team', icon: Users })
     }
+
+    // Chat - available to all users
+    items.push({ id: 'chat', label: 'Messages', icon: MessageSquare })
 
     // Support - available to all users
     items.push({ id: 'support', label: 'Support', icon: Headphones })
