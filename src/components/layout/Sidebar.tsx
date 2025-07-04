@@ -61,16 +61,28 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
     return 'U'
   }
 
-  const navigation = [
-    { name: 'Dashboard', href: '/', icon: Home, current: pathname === '/' },
-    { name: 'Elevator', href: '/elevator', icon: ArrowUpDown, current: pathname === '/elevator' },
-    { name: 'Support', href: '/support', icon: HelpCircle, current: pathname === '/support' },
-    { name: 'Team', href: '/team', icon: Users, current: pathname === '/team' },
-    { name: 'Chat', href: '/chat', icon: MessageCircle, current: pathname === '/chat' },
-    { name: 'Project Status', href: '/project-status', icon: GitBranch, current: pathname === '/project-status' },
-    { name: 'Profile', href: '/profile', icon: User, current: pathname === '/profile' },
-    { name: 'Admin', href: '/admin', icon: Settings, current: pathname === '/admin' },
-  ];
+  // Convert menu items to navigation with proper routing
+  const navigation = menuItems.map(item => {
+    let href = '/'
+    switch (item.id) {
+      case 'dashboard': href = '/'; break
+      case 'projects': href = '/'; break // Projects are shown on dashboard
+      case 'projects-enhanced': href = '/'; break // Enhanced projects on dashboard
+      case 'team': href = '/team'; break
+      case 'chat': href = '/chat'; break
+      case 'support': href = '/support'; break
+      case 'admin': href = '/admin'; break
+      case 'settings': href = '/profile'; break
+      default: href = '/'
+    }
+    
+    return {
+      name: item.label,
+      href,
+      icon: item.icon,
+      current: pathname === href || (item.id === 'dashboard' && pathname === '/')
+    }
+  })
 
   return (
     <div className={`bg-slate-800 border-r border-slate-700 shadow-lg transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`}>
