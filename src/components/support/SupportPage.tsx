@@ -46,7 +46,7 @@ export interface TicketAnalytics {
   }
 }
 
-export function SupportPage() {
+const SupportPage: React.FC = () => {
   const [showNewTicketForm, setShowNewTicketForm] = useState(false)
   const [tickets, setTickets] = useState<SupportTicket[]>([])
   const [analytics, setAnalytics] = useState<TicketAnalytics | null>(null)
@@ -273,7 +273,7 @@ export function SupportPage() {
       if (error) throw error
 
       // Transform the data to match our interface
-      const transformedTickets = (data || []).map(ticket => ({
+      const transformedTickets = (data || []).map((ticket: any) => ({
         ...ticket,
         user: ticket.user ? {
           id: ticket.user.id,
@@ -494,3 +494,5 @@ export function SupportPage() {
     </div>
   )
 }
+
+export default SupportPage

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { User, Save, Mail, Shield, Calendar, CheckCircle, AlertCircle, Edit3, Clock, Lock, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 
-export function ProfileSettings() {
+const ProfileSettings: React.FC = () => {
   const { user, profile, updateProfile, updatePassword, globalRole } = useAuth()
 
   // Role-based permissions
@@ -571,3 +571,5 @@ export function ProfileSettings() {
     </div>
   )
 }
+
+export default ProfileSettings

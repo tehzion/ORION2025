@@ -121,7 +121,7 @@ const DEMO_MESSAGES: ChatMessage[] = [
   }
 ]
 
-export function ChatSystem() {
+const ChatSystem: React.FC = () => {
   const { user, globalRole } = useAuth()
   const [conversations, setConversations] = useState<ChatConversation[]>([])
   const [selectedConversation, setSelectedConversation] = useState<ChatConversation | null>(null)
@@ -467,7 +467,7 @@ export function ChatSystem() {
                           <p className={`text-xs mt-1 ${
                             isOwnMessage ? 'text-purple-200' : 'text-slate-400'
                           }`}>
-                            {formatTime(message.timestamp)}
+                            {formatTime(message.timestamp as string)}
                           </p>
                         </div>
                       </div>
@@ -512,4 +512,6 @@ export function ChatSystem() {
       </div>
     </div>
   )
-} 
+}
+
+export default ChatSystem 

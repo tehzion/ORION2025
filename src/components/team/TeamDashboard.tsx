@@ -67,7 +67,7 @@ const DEMO_TEAM_MEMBERS: TeamMember[] = [
   }
 ]
 
-export function TeamDashboard() {
+const TeamDashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({})
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
@@ -407,4 +407,6 @@ export function TeamDashboard() {
       )}
     </div>
   )
-} 
+}
+
+export default TeamDashboard 

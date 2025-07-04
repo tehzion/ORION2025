@@ -148,7 +148,7 @@ const DEMO_SYSTEM_SETTINGS: SystemSetting[] = [
   }
 ]
 
-export function SystemSettings() {
+const SystemSettings: React.FC = () => {
   const [settings, setSettings] = useState<SystemSetting[]>(DEMO_SYSTEM_SETTINGS)
   const [activeCategory, setActiveCategory] = useState<string>('general')
   const [loading, setLoading] = useState(false)
@@ -351,4 +351,6 @@ export function SystemSettings() {
       </div>
     </div>
   )
-} 
+}
+
+export default SystemSettings 

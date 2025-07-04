@@ -13,7 +13,7 @@ interface ElevatorInterfaceProps {
   onBackToProjects: () => void
 }
 
-export function ElevatorInterface({ projectId, onBackToProjects }: ElevatorInterfaceProps) {
+const ElevatorInterface: React.FC<ElevatorInterfaceProps> = ({ projectId, onBackToProjects }) => {
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -437,3 +437,5 @@ export function ElevatorInterface({ projectId, onBackToProjects }: ElevatorInter
     </div>
   )
 }
+
+export default ElevatorInterface
