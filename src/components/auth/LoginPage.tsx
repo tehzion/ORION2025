@@ -94,11 +94,10 @@ const LoginPage: React.FC = () => {
     setError('')
 
     try {
-      // Simulate demo login
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Quick demo login without artificial delay
       setLoginData({ email: demoUser.email, password: demoUser.password })
       await signIn(demoUser.email, demoUser.password)
-      setSuccess(`Logged in as ${demoUser.name}`)
+      setSuccess(`Welcome, ${demoUser.name}!`)
     } catch (err) {
       setError('Demo login failed. Please try again.')
     } finally {

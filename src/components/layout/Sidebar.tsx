@@ -73,14 +73,14 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   ];
 
   return (
-    <div className={`bg-white shadow-lg transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`}>
-      <div className="flex items-center justify-between p-4 border-b">
+    <div className={`bg-slate-800 border-r border-slate-700 shadow-lg transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`}>
+      <div className="flex items-center justify-between p-4 border-b border-slate-700">
         {!isCollapsed && (
-          <h1 className="text-xl font-bold text-gray-900">Orion</h1>
+          <h1 className="text-xl font-bold text-white">Orion</h1>
         )}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          className="p-2 rounded-lg hover:bg-slate-700 transition-colors text-slate-400 hover:text-white"
         >
           {isCollapsed ? <Menu className="w-5 h-5" /> : <X className="w-5 h-5" />}
         </button>
@@ -94,8 +94,8 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
                 to={item.href}
                 className={`flex items-center px-3 py-2 rounded-lg transition-colors ${
                   item.current
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-blue-500/20 text-blue-400'
+                    : 'text-slate-300 hover:bg-slate-700 hover:text-white'
                 }`}
               >
                 <item.icon className="w-5 h-5" />

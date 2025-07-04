@@ -83,13 +83,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onUpdate, onDelete }
             e.stopPropagation()
             setShowMenu(!showMenu)
           }}
-          className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+          className="p-1 rounded-full hover:bg-slate-700 transition-colors"
         >
-          <MoreVertical className="w-5 h-5 text-gray-400" />
+          <MoreVertical className="w-5 h-5 text-slate-400" />
         </button>
         
         {showMenu && (
-          <div className="absolute right-0 top-8 w-48 bg-white rounded-lg shadow-lg border z-10">
+          <div className="absolute right-0 top-8 w-48 bg-slate-800 rounded-lg shadow-lg border border-slate-700 z-10">
             <div className="py-1">
               <button
                 onClick={(e) => {
@@ -97,7 +97,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onUpdate, onDelete }
                   setShowMenu(false)
                   // Add view logic here
                 }}
-                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="flex items-center w-full px-4 py-2 text-sm text-slate-300 hover:bg-slate-700"
               >
                 <Eye className="w-4 h-4 mr-2" />
                 View Details
@@ -108,7 +108,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onUpdate, onDelete }
                   setShowMenu(false)
                   // Add edit logic here
                 }}
-                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="flex items-center w-full px-4 py-2 text-sm text-slate-300 hover:bg-slate-700"
               >
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Project
@@ -119,7 +119,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onUpdate, onDelete }
                   setShowMenu(false)
                   onDelete(project.id)
                 }}
-                className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                className="flex items-center w-full px-4 py-2 text-sm text-red-400 hover:bg-red-500/10"
               >
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete Project
