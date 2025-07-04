@@ -1,22 +1,28 @@
 import React, { useState } from 'react'
 import { X, Calendar, FileText, AlignLeft, Building2, Save, Plus, X as XIcon } from 'lucide-react'
-import { Project } from '../../lib/supabase'
+import { CreateProjectData } from '../../lib/projectService'
 import { useAuth } from '../../contexts/AuthContext'
 
 interface ProjectFormProps {
-  onClose: () => void
-  onProjectCreated: (project: Project) => void
-  project?: Project
+  onSubmit: (projectData: CreateProjectData) => Promise<void>
+  onCancel: () => void
+  project?: any
 }
 
-export function ProjectForm({ onClose, onProjectCreated, project }: ProjectFormProps) {
-  const [name, setName] = useState(project?.name || '')
-  const [description, setDescription] = useState(project?.description || '')
-  const [deadline, setDeadline] = useState(project?.deadline || '')
+const ProjectForm: React.FC<ProjectFormProps> = ({ onSubmit, onCancel, project }) => {
+  const [formData, setFormData] = useState({
+    name: project?.name || '',
+    description: project?.description || '',
+    status: project?.status || 'active',
+    priority: project?.priority || 'medium',
+    due_date: project?.due_date || '',
+    budget: project?.budget || '',
+    tags: project?.tags || []
+  })
+  const [newTeamMember, setNewTeamMember] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const { user } = useAuth()
-  const [newTeamMember, setNewTeamMember] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,29 +32,10 @@ export function ProjectForm({ onClose, onProjectCreated, project }: ProjectFormP
     setError('')
 
     try {
-      // Create project with local state (no Supabase yet)
-      const newProject: Project = {
-        id: project?.id || `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        name: name.trim(),
-        description: description.trim(),
-        completion_percentage: 0,
-        last_activity: new Date().toISOString(),
-        deadline: deadline ? new Date(deadline).toISOString() : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // Default to 30 days from now
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        owner_id: user.id,
-        status: project?.status || 'active',
-        priority: project?.priority || 'medium',
-        dueDate: project?.dueDate || '',
-        budget: project?.budget ? parseFloat(project.budget) : 0,
-        team: project?.team || []
-      }
-
-      // Simulate API delay for better UX
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      onProjectCreated(newProject)
-      onClose()
+      await onSubmit({
+        ...formData,
+        budget: parseFloat(formData.budget) || 0
+      })
     } catch (err: any) {
       setError(err.message || 'Failed to create project')
     } finally {
@@ -63,19 +50,19 @@ export function ProjectForm({ onClose, onProjectCreated, project }: ProjectFormP
   }
 
   const addTeamMember = () => {
-    if (newTeamMember.trim() && !project?.team.includes(newTeamMember.trim())) {
-      onProjectCreated({
-        ...project,
-        team: [...project.team, newTeamMember.trim()]
+    if (newTeamMember.trim()) {
+      setFormData({
+        ...formData,
+        tags: [...formData.tags, newTeamMember.trim()]
       })
       setNewTeamMember('')
     }
   }
 
   const removeTeamMember = (index: number) => {
-    onProjectCreated({
-      ...project,
-      team: project.team.filter((_, i) => i !== index)
+    setFormData({
+      ...formData,
+      tags: formData.tags.filter((_: string, i: number) => i !== index)
     })
   }
 
@@ -93,7 +80,7 @@ export function ProjectForm({ onClose, onProjectCreated, project }: ProjectFormP
             </h2>
           </div>
           <button
-            onClick={onClose}
+            onClick={onCancel}
             className="text-slate-400 hover:text-white transition-colors"
           >
             <X className="h-5 w-5" />
@@ -114,14 +101,14 @@ export function ProjectForm({ onClose, onProjectCreated, project }: ProjectFormP
               id="name"
               type="text"
               required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               placeholder="Enter project name..."
               maxLength={100}
             />
             <p className="text-xs text-slate-400 mt-1">
-              {name.length}/100 characters
+              {formData.name.length}/100 characters
             </p>
           </div>
 
@@ -135,59 +122,91 @@ export function ProjectForm({ onClose, onProjectCreated, project }: ProjectFormP
             </label>
             <textarea
               id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={4}
               className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
               placeholder="Describe your project goals, scope, and key deliverables..."
               maxLength={500}
             />
             <p className="text-xs text-slate-400 mt-1">
-              {description.length}/500 characters
+              {formData.description.length}/500 characters
             </p>
+          </div>
+
+          {/* Status and Priority */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="status" className="block text-sm font-medium text-white mb-2">
+                Status
+              </label>
+              <select
+                id="status"
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+                <option value="on-hold">On Hold</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="priority" className="block text-sm font-medium text-white mb-2">
+                Priority
+              </label>
+              <select
+                id="priority"
+                value={formData.priority}
+                onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+                className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
           </div>
 
           {/* Deadline */}
           <div>
-            <label htmlFor="deadline" className="block text-sm font-medium text-white mb-2">
+            <label htmlFor="due_date" className="block text-sm font-medium text-white mb-2">
               <div className="flex items-center space-x-2">
                 <Calendar className="h-4 w-4" />
                 <span>Project Deadline</span>
               </div>
             </label>
             <input
-              id="deadline"
+              id="due_date"
               type="date"
-              value={deadline}
-              onChange={(e) => setDeadline(e.target.value)}
+              value={formData.due_date}
+              onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
               min={getTomorrowDate()}
               className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
-            <p className="text-xs text-slate-400 mt-1">
-              {deadline ? '' : 'If not specified, deadline will be set to 30 days from now'}
-            </p>
           </div>
 
-          {/* Project Type Info */}
-          <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
-            <div className="flex items-start space-x-3">
-              <div className="bg-purple-500/20 rounded-full p-1">
-                <Building2 className="h-4 w-4 text-purple-400" />
-              </div>
-              <div>
-                <h4 className="text-sm font-medium text-purple-300 mb-1">Project Setup</h4>
-                <p className="text-xs text-purple-200 leading-relaxed">
-                  Your project will be created with an initial task elevator. You can add team members, 
-                  create tasks, and track progress once the project is set up.
-                </p>
-              </div>
-            </div>
+          {/* Budget */}
+          <div>
+            <label htmlFor="budget" className="block text-sm font-medium text-white mb-2">
+              Budget ($)
+            </label>
+            <input
+              id="budget"
+              type="number"
+              value={formData.budget}
+              onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
+              className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              placeholder="Enter budget amount"
+            />
           </div>
 
-          {/* Team Members */}
+          {/* Tags */}
           <div>
             <label className="block text-sm font-medium text-white mb-2">
-              Team Members
+              Tags
             </label>
             <div className="flex gap-2 mb-2">
               <input
@@ -196,7 +215,7 @@ export function ProjectForm({ onClose, onProjectCreated, project }: ProjectFormP
                 onChange={(e) => setNewTeamMember(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTeamMember())}
                 className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="Add team member"
+                placeholder="Add tag"
               />
               <button
                 type="button"
@@ -207,14 +226,14 @@ export function ProjectForm({ onClose, onProjectCreated, project }: ProjectFormP
               </button>
             </div>
             
-            {/* Team Members List */}
+            {/* Tags List */}
             <div className="flex flex-wrap gap-2">
-              {project?.team.map((member, index) => (
+              {formData.tags.map((tag: string, index: number) => (
                 <div
                   key={index}
                   className="flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm"
                 >
-                  <span>{member}</span>
+                  <span>{tag}</span>
                   <button
                     type="button"
                     onClick={() => removeTeamMember(index)}
@@ -229,32 +248,35 @@ export function ProjectForm({ onClose, onProjectCreated, project }: ProjectFormP
 
           {/* Error Message */}
           {error && (
-            <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3">
-              <p className="text-red-200 text-sm">{error}</p>
+            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+              <p className="text-red-400 text-sm">{error}</p>
             </div>
           )}
 
-          {/* Actions */}
-          <div className="flex space-x-3 pt-4">
+          {/* Form Actions */}
+          <div className="flex items-center justify-end gap-4 pt-6 border-t border-slate-700">
             <button
               type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-3 bg-slate-700 border border-slate-600 text-slate-300 rounded-lg font-medium hover:bg-slate-600 hover:text-white transition-colors"
+              onClick={onCancel}
+              className="px-4 py-2 text-slate-400 bg-slate-700 rounded-lg hover:bg-slate-600 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={loading || !name.trim()}
-              className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-3 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              disabled={loading}
+              className="flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-colors disabled:opacity-50"
             >
               {loading ? (
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>Creating...</span>
-                </div>
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Creating...
+                </>
               ) : (
-                'Create Project'
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  {project ? 'Update Project' : 'Create Project'}
+                </>
               )}
             </button>
           </div>
@@ -263,3 +285,5 @@ export function ProjectForm({ onClose, onProjectCreated, project }: ProjectFormP
     </div>
   )
 }
+
+export default ProjectForm

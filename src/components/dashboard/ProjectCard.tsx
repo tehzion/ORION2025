@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Calendar, Clock, Users, MoreVertical, Edit, Trash2, Eye } from 'lucide-react'
-import { Project } from '../../lib/supabase'
+import { Project } from '../../lib/projectService'
 import { useAuth } from '../../contexts/AuthContext'
 
 interface ProjectCardProps {
@@ -9,7 +9,7 @@ interface ProjectCardProps {
   onDelete: (id: string) => void
 }
 
-export function ProjectCard({ project, onUpdate, onDelete }: ProjectCardProps) {
+const ProjectCard: React.FC<ProjectCardProps> = ({ project, onUpdate, onDelete }) => {
   const { profile } = useAuth()
   const [showMenu, setShowMenu] = useState(false)
 
@@ -28,7 +28,7 @@ export function ProjectCard({ project, onUpdate, onDelete }: ProjectCardProps) {
     })
   }
 
-  const isOverdue = new Date(project.deadline) < new Date()
+  const isOverdue = project.due_date ? new Date(project.due_date) < new Date() : false
 
   return (
     <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 sm:p-6 hover:border-purple-500 transition-all duration-200 cursor-pointer group">
@@ -38,7 +38,7 @@ export function ProjectCard({ project, onUpdate, onDelete }: ProjectCardProps) {
         </h3>
         <div className="flex items-center space-x-1 flex-shrink-0">
           <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-          <span className="text-xs text-slate-400 hidden sm:inline">Active</span>
+          <span className="text-xs text-slate-400 hidden sm:inline">{project.status}</span>
         </div>
       </div>
 
@@ -50,14 +50,14 @@ export function ProjectCard({ project, onUpdate, onDelete }: ProjectCardProps) {
       <div className="mb-4">
         <div className="flex justify-between items-center mb-2">
           <span className="text-xs text-slate-400">Progress</span>
-          <span className={`text-xs font-medium ${getStatusColor(project.completion_percentage)}`}>
-            {project.completion_percentage}%
+          <span className={`text-xs font-medium ${getStatusColor(project.progress)}`}>
+            {project.progress}%
           </span>
         </div>
         <div className="w-full bg-slate-700 rounded-full h-2">
           <div
             className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${project.completion_percentage}%` }}
+            style={{ width: `${project.progress}%` }}
           ></div>
         </div>
       </div>
@@ -66,13 +66,13 @@ export function ProjectCard({ project, onUpdate, onDelete }: ProjectCardProps) {
       <div className="flex justify-between items-center text-xs text-slate-400">
         <div className="flex items-center space-x-1">
           <Clock className="h-3 w-3 flex-shrink-0" />
-          <span className="hidden sm:inline">{formatDate(project.last_activity, profile?.timezone)}</span>
-          <span className="sm:hidden">{new Date(project.last_activity).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+          <span className="hidden sm:inline">{formatDate(project.updated_at, profile?.timezone)}</span>
+          <span className="sm:hidden">{new Date(project.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
         </div>
         <div className={`flex items-center space-x-1 ${isOverdue ? 'text-red-400' : ''}`}>
           <Calendar className="h-3 w-3 flex-shrink-0" />
-          <span className="hidden sm:inline">{formatDate(project.deadline, profile?.timezone)}</span>
-          <span className="sm:hidden">{new Date(project.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+          <span className="hidden sm:inline">{project.due_date ? formatDate(project.due_date, profile?.timezone) : 'No deadline'}</span>
+          <span className="sm:hidden">{project.due_date ? new Date(project.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'No deadline'}</span>
         </div>
       </div>
 
@@ -131,3 +131,5 @@ export function ProjectCard({ project, onUpdate, onDelete }: ProjectCardProps) {
     </div>
   )
 }
+
+export default ProjectCard

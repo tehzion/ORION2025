@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Sidebar } from './Sidebar'
 import { MobileNav } from './MobileNav'
-import { ProjectDashboard } from '../dashboard/ProjectDashboard'
+import ProjectDashboard from '../dashboard/ProjectDashboard'
 import { ElevatorInterface } from '../elevator/ElevatorInterface'
 import { ProfileSettings } from '../profile/ProfileSettings'
 import { SupportPage } from '../support/SupportPage'
@@ -14,7 +14,7 @@ import { UserSwitcher } from '../common/UserSwitcher'
 import { useAuth } from '../../contexts/AuthContext'
 import DemoBanner from '../common/DemoBanner'
 
-export function MainLayout() {
+const MainLayout: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
   const { globalRole } = useAuth()
@@ -105,3 +105,5 @@ export function MainLayout() {
     </div>
   )
 }
+
+export default MainLayout

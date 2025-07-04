@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Eye, EyeOff, Mail, Lock, Building2, ArrowRight, User, Shield, Users, Eye as EyeIcon } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
-import { DEMO_MODE } from '../../lib/demo'
+import { DEMO_MODE, DEMO_USERS } from '../../lib/demo'
 
 interface LoginFormData {
   email: string
@@ -15,40 +15,7 @@ interface SignUpFormData {
   fullName: string
 }
 
-const DEMO_USERS = [
-  {
-    id: 'super_admin',
-    name: 'Super Admin',
-    email: 'admin@orion.com',
-    password: 'admin123',
-    role: 'super_admin',
-    description: 'Full system access',
-    icon: Shield,
-    color: 'text-yellow-400'
-  },
-  {
-    id: 'developer',
-    name: 'Developer',
-    email: 'dev@orion.com',
-    password: 'dev123',
-    role: 'developer',
-    description: 'Task and project access',
-    icon: Users,
-    color: 'text-green-400'
-  },
-  {
-    id: 'client',
-    name: 'Client',
-    email: 'client@orion.com',
-    password: 'client123',
-    role: 'client',
-    description: 'Project viewing and feedback',
-    icon: EyeIcon,
-    color: 'text-purple-400'
-  }
-]
-
-export function LoginPage() {
+const LoginPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -172,7 +139,15 @@ export function LoginPage() {
             
             <div className="space-y-2">
               {DEMO_USERS.map((user) => {
-                const UserIcon = user.icon
+                const getIcon = (iconName: string) => {
+                  switch (iconName) {
+                    case 'Shield': return Shield;
+                    case 'Users': return Users;
+                    case 'Eye': return EyeIcon;
+                    default: return User;
+                  }
+                }
+                const UserIcon = getIcon(user.icon)
                 return (
                   <button
                     key={user.id}
@@ -488,4 +463,6 @@ export function LoginPage() {
       </div>
     </div>
   )
-} 
+}
+
+export default LoginPage 

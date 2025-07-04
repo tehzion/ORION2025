@@ -1,5 +1,42 @@
 // Demo configuration for offline/standalone deployment
-export const DEMO_MODE = true
+export const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true' || !import.meta.env.VITE_SUPABASE_URL
+
+// Demo users for authentication
+export const DEMO_USERS = [
+  {
+    id: 'demo-admin',
+    name: 'Super Admin',
+    email: 'admin@orion.com',
+    password: 'admin123',
+    full_name: 'Super Admin',
+    role: 'super_admin' as const,
+    description: 'Full system access',
+    color: 'text-yellow-400',
+    icon: 'Shield'
+  },
+  {
+    id: 'demo-developer',
+    name: 'Developer',
+    email: 'dev@orion.com',
+    password: 'dev123',
+    full_name: 'Developer',
+    role: 'user' as const,
+    description: 'Task and project access',
+    color: 'text-green-400',
+    icon: 'Users'
+  },
+  {
+    id: 'demo-client',
+    name: 'Client',
+    email: 'client@orion.com',
+    password: 'client123',
+    full_name: 'Client',
+    role: 'user' as const,
+    description: 'Project viewing and feedback',
+    color: 'text-purple-400',
+    icon: 'Eye'
+  }
+]
 
 // Mock user data for demo
 export const DEMO_USER = {
@@ -24,37 +61,46 @@ export const DEMO_PROJECTS = [
     id: '1',
     name: 'E-commerce Platform',
     description: 'Building a modern e-commerce platform with React and Node.js',
-    completion_percentage: 75,
-    last_activity: '2024-01-15T10:30:00Z',
-    deadline: '2024-02-28T23:59:59Z',
+    status: 'active' as const,
+    priority: 'high' as const,
+    progress: 75,
+    due_date: '2024-02-28',
+    budget: 25000,
     created_at: '2024-01-01T00:00:00Z',
     updated_at: '2024-01-15T10:30:00Z',
-    owner_id: 'demo-user-123',
-    status: 'active' as const
+    created_by: 'demo-user-123',
+    client_id: 'client-1',
+    tags: ['web-design', 'ecommerce', 'react']
   },
   {
     id: '2',
     name: 'Mobile App Redesign',
     description: 'Complete UI/UX overhaul of the mobile application',
-    completion_percentage: 45,
-    last_activity: '2024-01-14T16:45:00Z',
-    deadline: '2024-03-15T23:59:59Z',
+    status: 'active' as const,
+    priority: 'medium' as const,
+    progress: 45,
+    due_date: '2024-03-15',
+    budget: 35000,
     created_at: '2024-01-05T00:00:00Z',
     updated_at: '2024-01-14T16:45:00Z',
-    owner_id: 'demo-user-123',
-    status: 'active' as const
+    created_by: 'demo-user-123',
+    client_id: 'client-2',
+    tags: ['mobile', 'ui-ux', 'design']
   },
   {
     id: '3',
     name: 'API Integration',
     description: 'Integrate third-party APIs for enhanced functionality',
-    completion_percentage: 90,
-    last_activity: '2024-01-16T09:15:00Z',
-    deadline: '2024-01-30T23:59:59Z',
+    status: 'completed' as const,
+    priority: 'high' as const,
+    progress: 100,
+    due_date: '2024-01-30',
+    budget: 15000,
     created_at: '2024-01-10T00:00:00Z',
     updated_at: '2024-01-16T09:15:00Z',
-    owner_id: 'demo-user-123',
-    status: 'active' as const
+    created_by: 'demo-user-123',
+    client_id: 'client-3',
+    tags: ['api', 'integration', 'backend']
   }
 ]
 

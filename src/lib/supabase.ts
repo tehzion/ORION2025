@@ -2,32 +2,85 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const demoMode = import.meta.env.VITE_DEMO_MODE === 'true'
 
 // Create a mock Supabase client for demo mode when env vars are missing
 let supabase: any
 
-if (!supabaseUrl || !supabaseAnonKey) {
+if (demoMode || !supabaseUrl || !supabaseAnonKey) {
+  console.log('Running in demo mode - using mock Supabase client')
+  
   // Mock Supabase client for demo mode
   supabase = {
     auth: {
       getSession: () => Promise.resolve({ data: { session: null }, error: null }),
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-      signInWithPassword: () => Promise.resolve({ data: { user: null }, error: null }),
-      signUp: () => Promise.resolve({ data: { user: null }, error: null }),
-      signOut: () => Promise.resolve({ error: null })
+      signInWithPassword: async (credentials: { email: string; password: string }) => {
+        // Demo login logic
+        const demoUsers = [
+          { email: 'admin@orion.com', password: 'admin123', role: 'super_admin' },
+          { email: 'dev@orion.com', password: 'dev123', role: 'user' },
+          { email: 'client@orion.com', password: 'client123', role: 'user' }
+        ]
+        
+        const user = demoUsers.find(u => u.email === credentials.email && u.password === credentials.password)
+        
+        if (user) {
+          return {
+            data: {
+              user: {
+                id: `demo-${user.email}`,
+                email: user.email,
+                user_metadata: { full_name: user.email.split('@')[0] },
+                app_metadata: { role: user.role }
+              },
+              session: {
+                access_token: 'demo-token',
+                refresh_token: 'demo-refresh',
+                user: {
+                  id: `demo-${user.email}`,
+                  email: user.email
+                }
+              }
+            },
+            error: null
+          }
+        } else {
+          return {
+            data: { user: null, session: null },
+            error: { message: 'Invalid credentials' }
+          }
+        }
+      },
+      signUp: async (credentials: { email: string; password: string; options?: any }) => {
+        // Demo signup logic
+        return {
+          data: {
+            user: {
+              id: `demo-${credentials.email}`,
+              email: credentials.email,
+              user_metadata: credentials.options?.data || {}
+            },
+            session: null
+          },
+          error: null
+        }
+      },
+      signOut: () => Promise.resolve({ error: null }),
+      updateUser: (updates: any) => Promise.resolve({ data: { user: null }, error: null })
     },
-    from: () => ({
-      select: () => ({
-        eq: () => ({
-          order: () => Promise.resolve({ data: [], error: null }),
+    from: (table: string) => ({
+      select: (columns?: string) => ({
+        eq: (column: string, value: any) => ({
+          order: (column: string, options?: any) => Promise.resolve({ data: [], error: null }),
           single: () => Promise.resolve({ data: null, error: null })
         }),
-        update: () => ({
-          eq: () => Promise.resolve({ data: null, error: null })
+        update: (data: any) => ({
+          eq: (column: string, value: any) => Promise.resolve({ data: null, error: null })
         }),
-        insert: () => Promise.resolve({ data: null, error: null }),
+        insert: (data: any) => Promise.resolve({ data: null, error: null }),
         delete: () => ({
-          eq: () => Promise.resolve({ data: null, error: null })
+          eq: (column: string, value: any) => Promise.resolve({ data: null, error: null })
         })
       })
     })
@@ -35,6 +88,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 } else {
   // Real Supabase client
   supabase = createClient(supabaseUrl, supabaseAnonKey)
+  console.log('Connected to Supabase')
 }
 
 export { supabase }

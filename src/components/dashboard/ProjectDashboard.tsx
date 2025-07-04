@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import { Plus, Grid, List, CheckCircle, Sparkles, ArrowRight, Users, Calendar, Target, Search } from 'lucide-react'
-import { ProjectCard } from './ProjectCard'
-import { ProjectForm } from './ProjectForm'
+import ProjectCard from './ProjectCard'
+import ProjectForm from './ProjectForm'
 import { SearchBar } from '../common/SearchBar'
-import { Project, supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import { DEMO_MODE, DEMO_PROJECTS } from '../../lib/demo'
-import { projectService, CreateProjectData } from '../../lib/projectService'
+import { projectService, CreateProjectData, Project } from '../../lib/projectService'
 
 interface ProjectDashboardProps {
   onProjectSelect: (projectId: string) => void
 }
 
-export function ProjectDashboard({ onProjectSelect }: ProjectDashboardProps) {
+const ProjectDashboard: React.FC<ProjectDashboardProps> = ({ onProjectSelect }) => {
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -283,3 +282,5 @@ export function ProjectDashboard({ onProjectSelect }: ProjectDashboardProps) {
     </div>
   )
 }
+
+export default ProjectDashboard
