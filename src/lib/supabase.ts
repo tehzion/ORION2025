@@ -93,17 +93,22 @@ if (demoMode || !supabaseUrl || !supabaseAnonKey) {
 
 export { supabase }
 
-// Database types
+// Database types - Updated to match the actual database schema
 export interface Project {
   id: string
   name: string
   description: string
-  completion_percentage: number
+  progress: number // Changed from completion_percentage
   last_activity: string
-  deadline: string
+  due_date: string // Changed from deadline
   created_at: string
   updated_at: string
-  owner_id: string
+  created_by: string // Changed from owner_id
+  status: 'active' | 'completed' | 'on-hold' | 'cancelled'
+  priority: 'low' | 'medium' | 'high' | 'urgent'
+  budget?: number
+  tags?: string[]
+  client_id?: string
 }
 
 export interface Task {
@@ -112,13 +117,14 @@ export interface Task {
   title: string
   description: string
   status: 'pending' | 'in-progress' | 'ready-for-review' | 'approved' | 'revisions-requested' | 'complete'
-  assignee_id?: string
+  assigned_to?: string // Changed from assignee_id
   due_date?: string
   floor_position: number
   deliverable_link?: string
   review_comments?: string
   completion_percentage?: number
   priority?: 'low' | 'medium' | 'high' | 'urgent'
+  created_by?: string
   created_at: string
   updated_at: string
 }
@@ -127,7 +133,7 @@ export interface ProjectMember {
   id: string
   project_id: string
   user_id: string
-  role: 'owner' | 'developer' | 'client' | 'viewer'
+  role: 'owner' | 'manager' | 'member' | 'viewer' // Updated to match database constraint
   invited_by?: string
   invited_at: string
   joined_at?: string
@@ -201,24 +207,6 @@ export interface TicketMessage {
   user?: Profile
 }
 
-// Analytics interfaces
-export interface TicketTrends {
-  daily: { date: string; created: number; resolved: number }[]
-  weekly: { week: string; created: number; resolved: number }[]
-  monthly: { month: string; created: number; resolved: number }[]
-}
-
-export interface DepartmentAnalytics {
-  id: string
-  name: string
-  totalTickets: number
-  openTickets: number
-  resolvedTickets: number
-  avgResolutionTimeHours: number
-  urgentTickets: number
-  highPriorityTickets: number
-}
-
 export interface TicketAnalytics {
   trends: TicketTrends
   departments: DepartmentAnalytics[]
@@ -239,4 +227,21 @@ export interface TicketAnalytics {
     resolved: number
     closed: number
   }
+}
+
+export interface TicketTrends {
+  daily: { date: string; created: number; resolved: number }[]
+  weekly: { week: string; created: number; resolved: number }[]
+  monthly: { month: string; created: number; resolved: number }[]
+}
+
+export interface DepartmentAnalytics {
+  id: string
+  name: string
+  totalTickets: number
+  openTickets: number
+  resolvedTickets: number
+  avgResolutionTimeHours: number
+  urgentTickets: number
+  highPriorityTickets: number
 }

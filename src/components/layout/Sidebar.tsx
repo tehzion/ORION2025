@@ -3,12 +3,7 @@ import { Building2, Home, FolderOpen, Users, Settings, LogOut, Shield, Headphone
 import { useAuth } from '../../contexts/AuthContext'
 import { useLocation, Link } from 'react-router-dom'
 
-interface SidebarProps {
-  activeTab: string
-  onTabChange: (tab: string) => void
-}
-
-export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
+export function Sidebar() {
   const { signOut, user, profile, globalRole } = useAuth()
   const location = useLocation()
   const pathname = location.pathname
@@ -25,7 +20,6 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
 
     // Projects - available to all authenticated users
     items.push({ id: 'projects', label: 'Projects', icon: FolderOpen })
-    items.push({ id: 'projects-enhanced', label: 'Enhanced Projects', icon: BarChart3 })
 
     // Team management - only for admins and super admins
     if (globalRole === 'super_admin' || globalRole === 'admin') {
@@ -67,7 +61,6 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
     switch (item.id) {
       case 'dashboard': href = '/'; break
       case 'projects': href = '/projects'; break
-      case 'projects-enhanced': href = '/projects-enhanced'; break
       case 'team': href = '/team'; break
       case 'chat': href = '/chat'; break
       case 'support': href = '/support'; break

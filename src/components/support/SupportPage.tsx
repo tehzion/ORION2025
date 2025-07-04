@@ -5,6 +5,7 @@ import { UserTicketsList } from './UserTicketsList'
 import { AdminTicketsDashboard } from './AdminTicketsDashboard'
 import { SupportTicket, supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
+import { DEMO_MODE, DEMO_SUPPORT_TICKETS, DEMO_DEPARTMENTS } from '../../lib/demo'
 
 // Analytics interfaces
 export interface TicketTrends {
@@ -240,6 +241,22 @@ const SupportPage: React.FC = () => {
     if (!user) return
 
     try {
+      if (DEMO_MODE) {
+        // Use demo data in demo mode
+        const demoTickets = DEMO_SUPPORT_TICKETS.filter(ticket => {
+          if (globalRole === 'super_admin') return true
+          return ticket.user_id === user.id
+        })
+        setTickets(demoTickets)
+
+        // Generate analytics for super admin
+        if (globalRole === 'super_admin') {
+          const analyticsData = generateAnalytics(demoTickets)
+          setAnalytics(analyticsData)
+        }
+        return
+      }
+
       let query = supabase
         .from('support_tickets')
         .select(`

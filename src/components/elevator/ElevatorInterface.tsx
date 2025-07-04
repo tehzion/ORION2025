@@ -7,13 +7,16 @@ import { SearchBar } from '../common/SearchBar'
 import { Task, ProjectMember, supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import { DEMO_MODE, DEMO_TASKS } from '../../lib/demo'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 interface ElevatorInterfaceProps {
-  projectId: string
-  onBackToProjects: () => void
+  projectId?: string
+  onBackToProjects?: () => void
 }
 
-const ElevatorInterface: React.FC<ElevatorInterfaceProps> = ({ projectId, onBackToProjects }) => {
+const ElevatorInterface: React.FC<ElevatorInterfaceProps> = ({ projectId: propProjectId, onBackToProjects }) => {
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -23,7 +26,16 @@ const ElevatorInterface: React.FC<ElevatorInterfaceProps> = ({ projectId, onBack
   const [userRoleInProject, setUserRoleInProject] = useState<ProjectMember['role'] | null>(null)
   const { user, globalRole } = useAuth()
 
+  // Get projectId from URL params or props
+  const projectId = searchParams.get('projectId') || propProjectId || ''
 
+  const handleBackToProjects = () => {
+    if (onBackToProjects) {
+      onBackToProjects()
+    } else {
+      navigate('/')
+    }
+  }
 
   useEffect(() => {
     if (user) {
@@ -293,7 +305,7 @@ const ElevatorInterface: React.FC<ElevatorInterfaceProps> = ({ projectId, onBack
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
           <div className="flex items-center space-x-4">
             <button
-              onClick={onBackToProjects}
+              onClick={handleBackToProjects}
               className="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors"
             >
               <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />

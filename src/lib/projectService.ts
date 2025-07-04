@@ -5,7 +5,7 @@ export interface Project {
   name: string;
   description: string;
   status: 'active' | 'completed' | 'on-hold' | 'cancelled';
-  priority: 'low' | 'medium' | 'high';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
   progress: number;
   due_date: string;
   budget: number;
@@ -36,13 +36,17 @@ export interface ProjectTask {
   project_id: string;
   title: string;
   description: string;
-  status: 'pending' | 'in-progress' | 'completed' | 'cancelled';
-  priority: 'low' | 'medium' | 'high';
+  status: 'pending' | 'in-progress' | 'ready-for-review' | 'approved' | 'revisions-requested' | 'complete';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
   assigned_to?: string;
   due_date?: string;
   created_at: string;
   updated_at: string;
   created_by: string;
+  completion_percentage?: number;
+  floor_position?: number;
+  deliverable_link?: string;
+  review_comments?: string;
 }
 
 export interface ProjectComment {
@@ -64,7 +68,7 @@ export interface CreateProjectData {
   name: string;
   description: string;
   status?: 'active' | 'completed' | 'on-hold' | 'cancelled';
-  priority?: 'low' | 'medium' | 'high';
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
   due_date?: string;
   budget?: number;
   client_id?: string;
@@ -76,7 +80,7 @@ export interface UpdateProjectData {
   name?: string;
   description?: string;
   status?: 'active' | 'completed' | 'on-hold' | 'cancelled';
-  priority?: 'low' | 'medium' | 'high';
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
   progress?: number;
   due_date?: string;
   budget?: number;
@@ -87,16 +91,17 @@ class ProjectService {
   // Get all projects for the current user
   async getProjects(): Promise<Project[]> {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const { data: projects, error } = await supabase
         .from('projects')
         .select(`
           *,
-          members:project_members(
-            *,
-            user:users(id, email, full_name)
-          ),
-          tasks:project_tasks(*)
+          project_members!inner(user_id),
+          tasks(*)
         `)
+        .eq('project_members.user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -110,19 +115,18 @@ class ProjectService {
   // Get a single project by ID
   async getProject(id: string): Promise<Project | null> {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const { data: project, error } = await supabase
         .from('projects')
         .select(`
           *,
-          members:project_members(
+          project_members(
             *,
-            user:users(id, email, full_name)
+            user:profiles(id, email, full_name)
           ),
-          tasks:project_tasks(*),
-          comments:project_comments(
-            *,
-            user:users(id, email, full_name)
-          )
+          tasks(*)
         `)
         .eq('id', id)
         .single();
@@ -176,6 +180,9 @@ class ProjectService {
   // Update a project
   async updateProject(id: string, updates: UpdateProjectData): Promise<Project> {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const { data: project, error } = await supabase
         .from('projects')
         .update(updates)
@@ -194,6 +201,9 @@ class ProjectService {
   // Delete a project
   async deleteProject(id: string): Promise<void> {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const { error } = await supabase
         .from('projects')
         .delete()
@@ -207,7 +217,7 @@ class ProjectService {
   }
 
   // Add a member to a project
-  async addProjectMember(projectId: string, userId: string, role: 'owner' | 'manager' | 'member' | 'viewer' = 'member'): Promise<void> {
+  async addProjectMember(projectId: string, userId: string, role: 'owner' | 'manager' | 'member' | 'viewer'): Promise<void> {
     try {
       const { error } = await supabase
         .from('project_members')
@@ -240,33 +250,31 @@ class ProjectService {
     }
   }
 
-  // Get project members
-  async getProjectMembers(projectId: string): Promise<ProjectMember[]> {
+  // Get project tasks
+  async getProjectTasks(projectId: string): Promise<ProjectTask[]> {
     try {
-      const { data: members, error } = await supabase
-        .from('project_members')
-        .select(`
-          *,
-          user:users(id, email, full_name)
-        `)
-        .eq('project_id', projectId);
+      const { data: tasks, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('floor_position', { ascending: true });
 
       if (error) throw error;
-      return members || [];
+      return tasks || [];
     } catch (error) {
-      console.error('Error fetching project members:', error);
+      console.error('Error fetching project tasks:', error);
       throw error;
     }
   }
 
-  // Create a task
+  // Create a new task
   async createTask(taskData: Omit<ProjectTask, 'id' | 'created_at' | 'updated_at'>): Promise<ProjectTask> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
       const { data: task, error } = await supabase
-        .from('project_tasks')
+        .from('tasks')
         .insert({
           ...taskData,
           created_by: user.id
@@ -286,7 +294,7 @@ class ProjectService {
   async updateTask(id: string, updates: Partial<ProjectTask>): Promise<ProjectTask> {
     try {
       const { data: task, error } = await supabase
-        .from('project_tasks')
+        .from('tasks')
         .update(updates)
         .eq('id', id)
         .select()
@@ -304,7 +312,7 @@ class ProjectService {
   async deleteTask(id: string): Promise<void> {
     try {
       const { error } = await supabase
-        .from('project_tasks')
+        .from('tasks')
         .delete()
         .eq('id', id);
 
@@ -370,15 +378,15 @@ class ProjectService {
   async updateProjectProgress(projectId: string): Promise<void> {
     try {
       const { data: tasks, error: tasksError } = await supabase
-        .from('project_tasks')
+        .from('tasks')
         .select('status')
         .eq('project_id', projectId);
 
       if (tasksError) throw tasksError;
 
-      const totalTasks = tasks.length;
-      const completedTasks = tasks.filter(task => task.status === 'completed').length;
-      const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+              const totalTasks = tasks.length;
+        const completedTasks = tasks.filter((task: any) => task.status === 'complete').length;
+        const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
       await this.updateProject(projectId, { progress });
     } catch (error) {

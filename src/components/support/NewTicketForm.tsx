@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { X, MessageSquare, AlertTriangle, FileText, Tag, Building2 } from 'lucide-react'
 import { Department, supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
+import { DEMO_MODE, DEMO_DEPARTMENTS } from '../../lib/demo'
 
 interface NewTicketFormProps {
   onClose: () => void
@@ -24,6 +25,16 @@ export function NewTicketForm({ onClose, onTicketCreated }: NewTicketFormProps) 
 
   const fetchDepartments = async () => {
     try {
+      if (DEMO_MODE) {
+        setDepartments(DEMO_DEPARTMENTS)
+        // Set default department to General if available
+        const generalDept = DEMO_DEPARTMENTS.find((d: Department) => d.name.toLowerCase() === 'general')
+        if (generalDept) {
+          setDepartmentId(generalDept.id)
+        }
+        return
+      }
+
       const { data, error } = await supabase
         .from('departments')
         .select('*')
@@ -33,7 +44,7 @@ export function NewTicketForm({ onClose, onTicketCreated }: NewTicketFormProps) 
       setDepartments(data || [])
       
       // Set default department to General if available
-      const generalDept = data?.find(d => d.name.toLowerCase() === 'general')
+      const generalDept = data?.find((d: Department) => d.name.toLowerCase() === 'general')
       if (generalDept) {
         setDepartmentId(generalDept.id)
       }

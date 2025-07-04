@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { X, MessageSquare, Send, Clock, AlertTriangle, CheckCircle, User, Calendar, Building2, Edit3, Save, Shield } from 'lucide-react'
 import { SupportTicket, TicketMessage, Department, supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
+import { DEMO_MODE, DEMO_TICKET_MESSAGES, DEMO_DEPARTMENTS } from '../../lib/demo'
 
 interface TicketDetailModalProps {
   ticket: SupportTicket
@@ -31,6 +32,14 @@ export function TicketDetailModal({ ticket, onClose, onTicketUpdated, isAdmin = 
 
   const fetchMessages = async () => {
     try {
+      if (DEMO_MODE) {
+        // Use demo data in demo mode
+        const demoMessages = DEMO_TICKET_MESSAGES.filter((message: TicketMessage) => message.ticket_id === ticket.id)
+        setMessages(demoMessages)
+        setLoading(false)
+        return
+      }
+
       const { data, error } = await supabase
         .from('ticket_messages')
         .select(`
@@ -47,7 +56,7 @@ export function TicketDetailModal({ ticket, onClose, onTicketUpdated, isAdmin = 
       if (error) throw error
 
       // Transform the data
-      const transformedMessages = (data || []).map(message => ({
+      const transformedMessages = (data || []).map((message: any) => ({
         ...message,
         user: message.user ? {
           id: message.user.id,
@@ -66,6 +75,11 @@ export function TicketDetailModal({ ticket, onClose, onTicketUpdated, isAdmin = 
 
   const fetchDepartments = async () => {
     try {
+      if (DEMO_MODE) {
+        setDepartments(DEMO_DEPARTMENTS)
+        return
+      }
+
       const { data, error } = await supabase
         .from('departments')
         .select('*')
@@ -186,7 +200,7 @@ export function TicketDetailModal({ ticket, onClose, onTicketUpdated, isAdmin = 
     }
   }
 
-  const formatDate = (dateString: string, userTimeZone?: string | null) => {
+  const formatDate = (dateString: string, userTimeZone?: string | undefined) => {
     const date = new Date(dateString)
     const now = new Date()
     const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60)
@@ -223,7 +237,7 @@ export function TicketDetailModal({ ticket, onClose, onTicketUpdated, isAdmin = 
             <div>
               <h2 className="text-xl font-semibold text-white">{ticket.subject}</h2>
               <p className="text-slate-400 text-sm">
-                Ticket #{ticket.id.slice(-8)} • Created {formatDate(ticket.created_at, profile?.timezone)}
+                Ticket #{ticket.id.slice(-8)} • Created {formatDate(ticket.created_at, profile?.timezone || undefined)}
               </p>
             </div>
           </div>
@@ -261,7 +275,7 @@ export function TicketDetailModal({ ticket, onClose, onTicketUpdated, isAdmin = 
                   <User className="h-4 w-4 text-slate-400" />
                   <span className="text-slate-400 text-sm">Submitted by:</span>
                   <span className="text-white text-sm">
-                    {ticket.user?.full_name || ticket.user?.email || 'Unknown User'}
+                    {ticket.user?.full_name || 'Unknown User'}
                   </span>
                 </div>
               </div>
@@ -358,7 +372,7 @@ export function TicketDetailModal({ ticket, onClose, onTicketUpdated, isAdmin = 
                   <div className="flex items-center space-x-2">
                     <Calendar className="h-4 w-4 text-slate-400" />
                     <span className="text-slate-400 text-sm">Last updated:</span>
-                    <span className="text-white text-sm">{formatDate(ticket.updated_at, profile?.timezone)}</span>
+                    <span className="text-white text-sm">{formatDate(ticket.updated_at, profile?.timezone || undefined)}</span>
                   </div>
                 </div>
               )}
@@ -393,7 +407,7 @@ export function TicketDetailModal({ ticket, onClose, onTicketUpdated, isAdmin = 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 mb-1">
                       <span className="text-sm font-medium text-white">
-                        {message.user?.full_name || message.user?.email || 'Unknown User'}
+                        {message.user?.full_name || 'Unknown User'}
                       </span>
                       {globalRole === 'super_admin' && message.user_id !== ticket.user_id && (
                         <div className="bg-purple-500/20 px-2 py-0.5 rounded-full">
@@ -404,7 +418,7 @@ export function TicketDetailModal({ ticket, onClose, onTicketUpdated, isAdmin = 
                         </div>
                       )}
                       <span className="text-xs text-slate-400">
-                        {formatDate(message.created_at, profile?.timezone)}
+                        {formatDate(message.created_at, profile?.timezone || undefined)}
                       </span>
                     </div>
                     <p className="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap">

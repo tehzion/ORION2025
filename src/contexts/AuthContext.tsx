@@ -222,17 +222,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
+    console.log('Signing out...', { DEMO_MODE })
+    
     if (DEMO_MODE) {
-      // Demo mode - just clear the state
+      // Demo mode - clear the state and redirect to login
+      console.log('Demo mode sign out - clearing state')
       setUser(null)
       setProfile(null)
       setGlobalRole(null)
+      setSession(null)
+      // Force redirect to login page
+      window.location.href = '/login'
       return
     }
 
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
-    setProfile(null)
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) throw error
+      
+      // Clear all state
+      setUser(null)
+      setProfile(null)
+      setGlobalRole(null)
+      setSession(null)
+      
+      // Force redirect to login page
+      window.location.href = '/login'
+    } catch (error) {
+      console.error('Error signing out:', error)
+      // Even if there's an error, clear the state and redirect
+      setUser(null)
+      setProfile(null)
+      setGlobalRole(null)
+      setSession(null)
+      window.location.href = '/login'
+    }
   }
 
   const value = {
