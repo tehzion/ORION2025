@@ -7,9 +7,10 @@ interface ProjectCardProps {
   project: Project
   onUpdate: (id: string, updates: Partial<Project>) => void
   onDelete: (id: string) => void
+  onSelect?: (projectId: string) => void
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project, onUpdate, onDelete }) => {
+const ProjectCard: React.FC<ProjectCardProps> = ({ project, onUpdate, onDelete, onSelect }) => {
   const { profile } = useAuth()
   const [showMenu, setShowMenu] = useState(false)
 
@@ -31,7 +32,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onUpdate, onDelete }
   const isOverdue = project.due_date ? new Date(project.due_date) < new Date() : false
 
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 sm:p-6 hover:border-purple-500 transition-all duration-200 cursor-pointer group">
+    <div 
+      className="bg-slate-800 border border-slate-700 rounded-xl p-4 sm:p-6 hover:border-purple-500 transition-all duration-200 cursor-pointer group"
+      onClick={() => onSelect?.(project.id)}
+    >
       <div className="flex justify-between items-start mb-3 sm:mb-4">
         <h3 className="text-base sm:text-lg font-semibold text-white group-hover:text-purple-400 transition-colors line-clamp-1">
           {project.name}

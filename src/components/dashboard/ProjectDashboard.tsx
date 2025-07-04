@@ -124,95 +124,95 @@ const ProjectDashboard: React.FC<ProjectDashboardProps> = ({ onProjectSelect }) 
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading projects...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-slate-400">Loading projects...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-slate-900 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Project Dashboard</h1>
-          <p className="text-gray-600">Manage and track all your projects</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Project Dashboard</h1>
+          <p className="text-slate-400">Manage and track all your projects</p>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-700">{error}</p>
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+            <p className="text-red-400">{error}</p>
           </div>
         )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="bg-slate-800 border border-slate-700 p-6 rounded-lg shadow-sm">
             <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Target className="w-6 h-6 text-blue-600" />
+              <div className="p-2 bg-blue-500/20 rounded-lg">
+                <Target className="w-6 h-6 text-blue-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Active Projects</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.active}</p>
+                <p className="text-sm font-medium text-slate-400">Active Projects</p>
+                <p className="text-2xl font-bold text-white">{stats.active}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="bg-slate-800 border border-slate-700 p-6 rounded-lg shadow-sm">
             <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Target className="w-6 h-6 text-green-600" />
+              <div className="p-2 bg-green-500/20 rounded-lg">
+                <Target className="w-6 h-6 text-green-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Completed</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.completed}</p>
+                <p className="text-sm font-medium text-slate-400">Completed</p>
+                <p className="text-2xl font-bold text-white">{stats.completed}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="bg-slate-800 border border-slate-700 p-6 rounded-lg shadow-sm">
             <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Target className="w-6 h-6 text-yellow-600" />
+              <div className="p-2 bg-yellow-500/20 rounded-lg">
+                <Target className="w-6 h-6 text-yellow-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">On Hold</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.onHold}</p>
+                <p className="text-sm font-medium text-slate-400">On Hold</p>
+                <p className="text-2xl font-bold text-white">{stats.onHold}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="bg-slate-800 border border-slate-700 p-6 rounded-lg shadow-sm">
             <div className="flex items-center">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <Target className="w-6 h-6 text-red-600" />
+              <div className="p-2 bg-red-500/20 rounded-lg">
+                <Target className="w-6 h-6 text-red-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Cancelled</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.cancelled}</p>
+                <p className="text-sm font-medium text-slate-400">Cancelled</p>
+                <p className="text-2xl font-bold text-white">{stats.cancelled}</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Controls */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
+        <div className="bg-slate-800 border border-slate-700 p-6 rounded-lg shadow-sm mb-6">
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
             <div className="flex flex-col sm:flex-row gap-4 flex-1">
               {/* Search */}
               <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                 <input
                   type="text"
                   placeholder="Search projects..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
@@ -220,7 +220,7 @@ const ProjectDashboard: React.FC<ProjectDashboardProps> = ({ onProjectSelect }) 
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
@@ -233,7 +233,7 @@ const ProjectDashboard: React.FC<ProjectDashboardProps> = ({ onProjectSelect }) 
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="name">Sort by Name</option>
                 <option value="due_date">Sort by Due Date</option>
@@ -245,7 +245,7 @@ const ProjectDashboard: React.FC<ProjectDashboardProps> = ({ onProjectSelect }) 
             {/* Add Project Button */}
             <button
               onClick={() => setShowForm(true)}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-colors"
             >
               <Plus className="w-5 h-5 mr-2" />
               Add Project
@@ -261,16 +261,17 @@ const ProjectDashboard: React.FC<ProjectDashboardProps> = ({ onProjectSelect }) 
               project={project}
               onUpdate={handleUpdateProject}
               onDelete={handleDeleteProject}
+              onSelect={onProjectSelect}
             />
           ))}
         </div>
 
         {sortedProjects.length === 0 && !loading && (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No projects found</p>
+            <p className="text-slate-400 text-lg">No projects found</p>
             <button
               onClick={() => setShowForm(true)}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="mt-4 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-colors"
             >
               Create your first project
             </button>
