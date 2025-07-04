@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase, Profile } from '../lib/supabase'
-import { DEMO_MODE, DEMO_USER, DEMO_PROFILE, DEMO_CONFIG } from '../lib/demo'
+import { DEMO_MODE, DEMO_USER, DEMO_PROFILE, DEMO_CONFIG, DEMO_USERS } from '../lib/demo'
 
 interface AuthContextType {
   user: User | null
@@ -96,8 +96,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
+    console.log('AuthContext useEffect - DEMO_MODE:', DEMO_MODE, 'DEMO_CONFIG.autoLogin:', DEMO_CONFIG.autoLogin)
+    
     if (DEMO_MODE && DEMO_CONFIG.autoLogin) {
       // Demo mode - auto login with mock user
+      console.log('Auto-logging in demo user')
       setUser({
         ...DEMO_USER,
         app_metadata: {},
@@ -155,6 +158,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signIn = async (email: string, password: string) => {
+    console.log('signIn called with:', { email, password, DEMO_MODE })
+    
+    if (DEMO_MODE) {
+      // Demo mode - find demo user and set state
+      console.log('Looking for demo user in:', DEMO_USERS)
+      const demoUser = DEMO_USERS.find((u: any) => u.email === email && u.password === password)
+      console.log('Found demo user:', demoUser)
+      if (!demoUser) {
+        throw new Error('Invalid demo credentials')
+      }
+      
+      const mockUser = {
+        ...DEMO_USER,
+        email: demoUser.email,
+        app_metadata: {},
+        user_metadata: { full_name: demoUser.full_name },
+        aud: 'authenticated',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        email_confirmed_at: new Date().toISOString(),
+        phone_confirmed_at: undefined,
+        last_sign_in_at: new Date().toISOString(),
+        role: 'authenticated',
+        confirmation_sent_at: undefined,
+        recovery_sent_at: undefined,
+        email_change_confirm_status: 0,
+        banned_until: undefined,
+        reauthentication_sent_at: undefined,
+        reauthentication_confirm_status: 0
+      } as unknown as User
+      
+      const mockProfile = {
+        ...DEMO_PROFILE,
+        full_name: demoUser.full_name,
+        global_role: demoUser.role
+      }
+      
+      setUser(mockUser)
+      setProfile(mockProfile)
+      setGlobalRole(demoUser.role)
+      return
+    }
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -176,6 +222,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
+    if (DEMO_MODE) {
+      // Demo mode - just clear the state
+      setUser(null)
+      setProfile(null)
+      setGlobalRole(null)
+      return
+    }
+
     const { error } = await supabase.auth.signOut()
     if (error) throw error
     setProfile(null)

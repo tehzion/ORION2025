@@ -26,10 +26,15 @@ const ProjectDashboard: React.FC<ProjectDashboardProps> = ({ onProjectSelect }) 
   }, [])
 
   const loadProjects = async () => {
-    if (!user) return
+    console.log('Loading projects...', { user, DEMO_MODE })
+    if (!user) {
+      console.log('No user, returning early')
+      return
+    }
 
     if (DEMO_MODE) {
       // Use demo data in demo mode
+      console.log('Using demo projects:', DEMO_PROJECTS)
       setProjects(DEMO_PROJECTS)
       setLoading(false)
       return
