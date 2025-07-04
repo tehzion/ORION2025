@@ -5,6 +5,8 @@ import MainLayout from './components/layout/MainLayout';
 import LoginPage from './components/auth/LoginPage';
 import ProjectStatusDemo from './components/project/ProjectStatusDemo';
 import ProjectDashboard from './components/dashboard/ProjectDashboard';
+import { ProjectManagement } from './components/projects/ProjectManagement';
+import { ProjectDashboardEnhanced } from './components/projects/ProjectDashboardEnhanced';
 import ElevatorInterface from './components/elevator/ElevatorInterface';
 import SupportPage from './components/support/SupportPage';
 import ProfileSettings from './components/profile/ProfileSettings';
@@ -20,8 +22,10 @@ function App() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/" element={<MainLayout />}>
-              <Route index element={<ProjectDashboard />} />
-              <Route path="elevator" element={<ElevatorInterface />} />
+              <Route index element={<ProjectDashboard onProjectSelect={() => {}} />} />
+              <Route path="projects" element={<ProjectManagement />} />
+              <Route path="projects-enhanced" element={<ProjectDashboardEnhanced />} />
+              <Route path="elevator" element={<ElevatorInterface projectId="" onBackToProjects={() => {}} />} />
               <Route path="support" element={<SupportPage />} />
               <Route path="profile" element={<ProfileSettings />} />
               <Route path="team" element={<TeamDashboard />} />

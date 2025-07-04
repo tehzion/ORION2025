@@ -66,8 +66,8 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
     let href = '/'
     switch (item.id) {
       case 'dashboard': href = '/'; break
-      case 'projects': href = '/'; break // Projects are shown on dashboard
-      case 'projects-enhanced': href = '/'; break // Enhanced projects on dashboard
+      case 'projects': href = '/projects'; break
+      case 'projects-enhanced': href = '/projects-enhanced'; break
       case 'team': href = '/team'; break
       case 'chat': href = '/chat'; break
       case 'support': href = '/support'; break
